@@ -12,6 +12,7 @@ using namespace std;
 using namespace seal;
 
 int main() {
+    {/**@start Encryption parameters**/}
     // Define the scheme type = bgv
     EncryptionParameters params(scheme_type::bgv);
     // Define the polynomial modulus degree = 2^11
@@ -36,7 +37,9 @@ int main() {
 
     // Number of variables to hold
     const size_t n = 6;
+    {/**@end Encryption parameters**/}
 
+    {/**@start Initialize the R1CS system**/}
     // An object of type RingElem to hold the variables, possibly for handling the R1CS system
     ringsnark::protoboard<R> pb;
 
@@ -55,6 +58,7 @@ int main() {
     // 3) the variable to hold the result of a * b
     pb.add_r1cs_constraint(ringsnark::r1cs_constraint<R>(vars[2], vars[3], vars[5]));
     pb.add_r1cs_constraint(ringsnark::r1cs_constraint<R>(vars[0] + vars[1], vars[5], vars[4]));
+    {/**@end Initialize the R1CS system**/}
 
     // Set values
     // This is a vector of 6 RingElem elements
@@ -68,12 +72,15 @@ int main() {
         auto encoder = BatchEncoder(context);
         // Get a pointer to NTT tables. NTT is the most efficient method for multiplying two polynomials
         // of high degree with integer coefficients
+        {/**@start create the NTT tables**/}
         auto tables = context.get_context_data(context.first_parms_id())->small_ntt_tables();
+        {/**@end create the NTT tables**/}
 
-        vector<uint64_t> vs(N);
+        vector<uint64_t> vs(N); // A vector for encoding the ptxt elements into a polynomial
         Plaintext ptxt;
         vector<::polytools::SealPoly> polys(n, ::polytools::SealPoly(context));
 
+        {/**@start encode the equation's input (plaintext) into N-degree poly matching the R1CS **/}
         // Inputs
         vs[0] = 2;
         // encode the matrix values into the destination plaintext
@@ -128,6 +135,7 @@ int main() {
         polys[4] = poly;
         values[4] = ringsnark::seal::RingElem(poly);
 //        values[4] = ringsnark::seal::RingElem(vs[4]);
+        {/**@end encode the equation's input (plaintext) into N-degree poly matching the R1CS **/}
     }
     for (size_t i = 0; i < n; i++) {
         pb.val(vars[i]) = values[i];
@@ -141,15 +149,21 @@ int main() {
     {
         cout << "=== Rinocchio ===" << endl;
         // Get a public key and a verification key
+        {/**@start Generate prover key and verifier key**/}
         const auto keypair = ringsnark::rinocchio::generator<R, E>(pb.get_constraint_system());
         cout << "Size of pk:\t" << keypair.pk.size_in_bits() << " bits" << endl;
         cout << "Size of vk:\t" << keypair.vk.size_in_bits() << " bits" << endl;
+        {/**@end Generate prover key and verifier key**/}
 
+        {/**@start Generate the proof**/}
         const auto proof = ringsnark::rinocchio::prover(keypair.pk, pb.primary_input(), pb.auxiliary_input());
         cout << "Size of proof:\t" << proof.size_in_bits() << " bits" << endl;
+        {/**@end Generate the proof**/}
 
+        {/**@start Verify the proof**/}
         const bool verif = ringsnark::rinocchio::verifier(keypair.vk, pb.primary_input(), proof);
         cout << "Verification passed: " << std::boolalpha << verif << endl;
+        {/**@end Verify the proof**/}
     }
     {
         cout << "=============" << endl;
@@ -166,7 +180,7 @@ int main() {
     }
 
 // Omar added this to pause the program
-int x; 
-cout << "\n\nPause the program... "; // Type a number and press enter
-cin >> x; // Get user input from the keyboard
+    int x;
+    cout << "\n\nPause the program... "; // Type a number and press enter
+    cin >> x; // Get user input from the keyboard
 }
