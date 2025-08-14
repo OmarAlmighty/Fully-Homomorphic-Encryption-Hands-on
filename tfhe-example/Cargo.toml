@@ -1,0 +1,7 @@
+[package]
+name = "tfhe-example"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tfhe = { version = "~1.3.3", features = ["integer", "boolean"] }
