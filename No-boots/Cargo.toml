@@ -5,3 +5,27 @@ edition = "2024"
 
 [dependencies]
 tfhe = { version = "*", features = ["boolean", "shortint"] }
+
+[[bin]]
+name = "ShortInt_main"
+path = "src/ShortInt_main.rs"
+
+[[bin]]
+name = "Boolean_main"
+path = "src/Boolean_main.rs"
+
+[[bin]]
+name = "Boolean_main_1"
+path = "src/Boolean_main_1.rs"
+
+[[bin]]
+name = "ShortInt_2"
+path = "src/ShortInt_2.rs"
+
+[[bin]]
+name = "ShortInt_3"
+path = "src/ShortInt_3.rs"
+
+[[bin]]
+name = "ShortInt_4"
+path = "src/ShortInt_4.rs"

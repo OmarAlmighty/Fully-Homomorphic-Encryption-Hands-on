@@ -1,6 +1,6 @@
+use std::time::Instant;
 use tfhe::boolean::gen_keys;
 use tfhe::boolean::prelude::*;
-use std::time::Instant;
 use tfhe::boolean::server_key::RefreshMeEngine;
 
 fn full_adder(
@@ -11,24 +11,23 @@ fn full_adder(
 ) -> (Ciphertext, Ciphertext) {
     // sum = a ^ b ^ carry_in
     let a_xor_b = sk.xor(a, b);
-    //let a_xor_b = sk.refresh_me(&a_xor_b);
+    let a_xor_b = sk.refresh_me(&a_xor_b);
 
     let sum = sk.xor(&a_xor_b, carry_in);
-    //let sum = sk.refresh_me(&sum);
+    let sum = sk.refresh_me(&sum);
 
     // carry_out = (a & b) | (a & carry_in) | (b & carry_in)
     let a_and_b = sk.and(a, b);
-    let a_and_b = sk.refresh_me(&a_and_b);
+    //let a_and_b = sk.refresh_me(&a_and_b);
 
     let a_and_cin = sk.and(a, carry_in);
-    //let a_and_cin = sk.refresh_me(&a_and_cin);
-
+    // let a_and_cin = sk.refresh_me(&a_and_cin);
 
     let b_and_cin = sk.and(b, carry_in);
-    let b_and_cin = sk.refresh_me(&b_and_cin);
+    // let b_and_cin = sk.refresh_me(&b_and_cin);
 
     let temp = sk.or(&a_and_b, &a_and_cin);
-    //let temp = sk.refresh_me(&temp);
+    let temp = sk.refresh_me(&temp);
 
     let carry_out = sk.or(&temp, &b_and_cin);
     let carry_out = sk.refresh_me(&carry_out);
@@ -37,11 +36,7 @@ fn full_adder(
 }
 
 /// Adds two binary numbers represented as vectors of encrypted bits
-fn add_encrypted(
-    sk: &ServerKey,
-    a: &[Ciphertext],
-    b: &[Ciphertext],
-) -> Vec<Ciphertext> {
+fn add_encrypted(sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext]) -> Vec<Ciphertext> {
     let mut result = Vec::new();
     let mut carry = sk.trivial_encrypt(false); // Initial carry = 0
 
@@ -54,7 +49,6 @@ fn add_encrypted(
     result.push(carry); // carry-out
     result
 }
-
 
 // fn tester(
 //     sk: &ServerKey,
@@ -72,20 +66,16 @@ fn add_encrypted(
 //
 //     result
 // }
+
 /// Multiplies two encrypted binary numbers
 
-fn and_refresh(sk: &ServerKey,
-               a: &Ciphertext,
-               b: &Ciphertext, ) -> Ciphertext{
+fn and_refresh(sk: &ServerKey, a: &Ciphertext, b: &Ciphertext) -> Ciphertext {
     let res = sk.and(a, b);
     let res = sk.refresh_me(&res);
     res
 }
-fn multiply_encrypted(
-    sk: &ServerKey,
-    b: &[Ciphertext],
-    a: &[Ciphertext],
-) -> Vec<Ciphertext> {
+fn multiply_encrypted(sk: &ServerKey, b: &[Ciphertext], a: &[Ciphertext]) -> Vec<Ciphertext> {
+    // dropped from 614 secs to 304 secs
     let n = a.len();
     let mut result = vec![sk.trivial_encrypt(false); 2 * n];
 
@@ -114,27 +104,21 @@ fn multiply_encrypted(
 }
 
 
+
 fn main() {
     // We generate a set of client/server keys, using the default parameters:
     let (client_key, server_key) = gen_keys();
 
     // 4-bit example: multiply 0b0011 (3) * 0b0101 (5)
-    let a_bits = [false, true, true, false]; // 0b0011
+    let a_bits = [true, true, false, false]; // 0b0011
     let b_bits = [true, false, true, false]; // 0b0101
 
-    let ct_a: Vec<_> = a_bits
-        .iter()
-        .map(|&bit| client_key.encrypt(bit))
-        .collect();
-    
+    let ct_a: Vec<_> = a_bits.iter().map(|&bit| client_key.encrypt(bit)).collect();
 
-    let ct_b: Vec<_> = b_bits
-        .iter()
-        .map(|&bit| client_key.encrypt(bit))
-        .collect();
+    let ct_b: Vec<_> = b_bits.iter().map(|&bit| client_key.encrypt(bit)).collect();
 
     let start = Instant::now();
-    let ct_product = multiply_encrypted(&server_key, &ct_a, &ct_b);
+    let ct_product = add_encrypted(&server_key, &ct_a, &ct_b);
     let elapsed = start.elapsed();
 
     // Decrypt result
