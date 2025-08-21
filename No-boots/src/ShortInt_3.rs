@@ -12,7 +12,7 @@ pub fn main() {
     println!("base {base}");
     let carry_bits = cks.parameters().carry_modulus().0.ilog2() as usize;
 
-    let bit_size = 4;
+    let bit_size = 8;
     let num_digits = (bit_size + message_bits - 1) / message_bits;
 
     // Example 4-bit values

@@ -11,8 +11,8 @@ pub fn main() {
     let (cks, sks) = gen_keys(PARAM_MESSAGE_2_CARRY_2_KS_PBS);
 
     // Encrypt values and add them
-    let ct1 = cks.encrypt(2);
-    let ct2 = cks.encrypt(4);
+    let ct1 = cks.encrypt(1);
+    let ct2 = cks.encrypt(2);
 
     let start = Instant::now();
     let res = sks.unchecked_mul_lsb(&ct1, &ct2);

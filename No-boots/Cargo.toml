@@ -8,7 +8,7 @@ tfhe = { version = "*", features = ["boolean", "shortint"] }
 
 [[bin]]
 name = "ShortInt_main"
-path = "src/ShortInt_main.rs"
+path = "src/ShortInt_1.rs"
 
 [[bin]]
 name = "Boolean_main"
@@ -17,6 +17,12 @@ path = "src/Boolean_main.rs"
 [[bin]]
 name = "Boolean_main_1"
 path = "src/Boolean_main_1.rs"
+
+[[bin]]
+name = "Boolean_main_2"
+path = "src/Boolean_main_2.rs"
+
+
 
 [[bin]]
 name = "ShortInt_2"

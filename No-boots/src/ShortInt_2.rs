@@ -16,7 +16,7 @@ pub fn main() {
     let ct_low1 = cks.encrypt(low1);
     let ct_high1 = cks.encrypt(high1);
     let vec1 = vec![ct_low1, ct_high1];
-
+    
     let low2 = (val2 % 4) as u64;
     let high2 = (val2 / 4) as u64;
     let ct_low2 = cks.encrypt(low2);
