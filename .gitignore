@@ -4,3 +4,5 @@
 /tfhe-example/.idea
 /tfhe-example/target
 /TFHE-rs
+/PulpFHE-rs/.idea
+/PulpFHE-rs/target/debug
