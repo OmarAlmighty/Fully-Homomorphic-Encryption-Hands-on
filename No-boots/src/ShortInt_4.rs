@@ -28,24 +28,57 @@ fn full_adder(
 }
 
 /// Adds two binary numbers represented as vectors of encrypted bits
-/// Adds two binary numbers represented as vectors of encrypted bits
-fn add_encrypted(sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext]) -> Vec<Ciphertext> {
+fn add_encrypted(sk: &ServerKey, a: &mut [Ciphertext], b: &mut [Ciphertext]) -> Vec<Ciphertext> {
     let mut result = Vec::new();
-    let mut carry = sk.create_trivial(0); // Initial carry = 0
+    // The initial carry must be a trivial encryption of 0.
+    let mut carry = sk.create_trivial(0);
+    println!("{}", a.len());
+    println!("{}", b.len());
+    for i in 0..a.len() {
+        let mut bit_a = &mut a[i];
+        let mut bit_b = &mut b[i];
+        // Compute the full sum: a + b + carry_in
+        let mut temp_sum = sk.unchecked_add(&mut bit_a, &mut bit_b);
+        // let lut = sk.generate_lookup_table(|x| x);
+        // let mut bootstrapped = sk.apply_lookup_table(&temp_sum, &lut);
+        // Declare `sum` as mutable.
+        let mut sum = sk.unchecked_add(&mut temp_sum, &mut carry);
 
-    for (bit_a, bit_b) in a.iter().zip(b.iter()) {
-        let temp = sk.add(bit_a, bit_b);
-        let sum = sk.add(&temp, &carry);
-        let new_carry = sk.carry_extract(&sum);
+        //  Pass a mutable reference to `carry_extract`.
+        // This updates `sum` to the 2-bit result and returns the new carry.
+        let new_carry = sk.carry_extract(&mut sum);
 
         result.push(sum);
         carry = new_carry;
+
     }
 
-    result.push(carry); // carry-out
+    // Append the final carry to handle potential overflow.
+    result.push(carry);
     result
 }
+fn multiply_encrypted(sk: &ServerKey, a: &mut [Ciphertext], b: &mut [Ciphertext]) -> Vec<Ciphertext> {
+ // produces incorrect results for 32 bits, I think it needs bootstrapping :-)
+    let n = a.len(); // Number of 2-bit chunks in each input
+    let mut result = vec![sk.create_trivial(0); n * 2]; // Initialize result with 2n chunks
 
+    // Generate and accumulate partial products
+    for i in 0..n {
+        let mut partial_product = vec![sk.create_trivial(0); result.len()];
+        for j in 0..n {
+            // Compute partial product: a[j] * b[i]
+            let product = sk.unchecked_mul_lsb(&mut a[j], &mut b[i]);
+            // Place the product in the correct position (shifted by i + j chunks)
+            if i + j < n * 2 {
+                partial_product[i + j] = product;
+            }
+        }
+        // Add partial product to result
+        result = add_encrypted(sk, &mut result, &mut partial_product);
+    }
+
+    result
+}
 pub fn main() {
     // Generate the client key and the server key:
     let (cks, sks) = gen_keys(PARAM_MESSAGE_2_CARRY_2_KS_PBS);
@@ -56,12 +89,12 @@ pub fn main() {
     println!("base {base}");
     let carry_bits = cks.parameters().carry_modulus().0.ilog2() as usize;
 
-    let bit_size = 16;
+    let bit_size = 32;
     let num_digits = (bit_size + message_bits - 1) / message_bits;
 
     // Example 4-bit values
-    let val1: u128 = 1001; // binary 0101, in base 4: 11
-    let val2: u128 = 2003; // binary 0110, in base 4: 12
+    let val1: u128 = 120; // binary 0101, in base 4: 11
+    let val2: u128 = 200; // binary 0110, in base 4: 12
 
     let mut digits1: Vec<Ciphertext> = Vec::with_capacity(num_digits);
     let mut ptxt1: Vec<u8> = Vec::with_capacity(num_digits);
@@ -84,7 +117,9 @@ pub fn main() {
     println!("ptxt1 {:?}", ptxt1);
     println!("ptxt2 {:?}", ptxt2);
 
-    let result_digits = add_encrypted(&sks, &digits1, &digits2);
+    let start = Instant::now();
+    let result_digits = multiply_encrypted(&sks, &mut digits1, &mut digits2);
+    let duration = start.elapsed();
 
     // Decrypt result digits
     let mut result: u128 = 0;
@@ -95,10 +130,12 @@ pub fn main() {
     }
     println!("{result}");
 
-    for (i, digit) in result_digits.iter().enumerate() {
-        let val = cks.decrypt(digit);
-        print!("{val}, ");
-    }
+    println!("Duration: {:?}", duration);
+
+    // for (i, digit) in result_digits.iter().enumerate() {
+    //     let val = cks.decrypt(digit);
+    //     print!("{val}, ");
+    // }
 
 
     // let start = Instant::now();
