@@ -6,3 +6,6 @@
 /TFHE-rs
 /PulpFHE-rs/.idea
 /PulpFHE-rs/target/debug
+/no-bootstrapping-proj
+No-boots/.DS_Store
+.DS_Store
