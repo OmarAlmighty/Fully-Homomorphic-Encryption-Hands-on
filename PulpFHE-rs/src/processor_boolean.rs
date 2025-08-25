@@ -1,3 +1,4 @@
+#![allow(warnings)]
 //! # Description
 //! This module includes the implementation of the circuits (functional units) that
 //! the processor can perform on encrypted data. The gates operation are not bootstrapped.
@@ -10,20 +11,38 @@
 //! homomorphically.
 //!
 
-use std::ffi::c_int;
 use crate::processor_units::Processor;
-use std::time::Instant;
+use std::process::exit;
 use tfhe::boolean::gen_keys;
 use tfhe::boolean::prelude::*;
 use tfhe::boolean::server_key::RefreshEngine;
 
+#[cfg(test)]
+mod test_processor_boolean_8;
+
 pub struct ProcessorBoolean;
+
+impl ProcessorBoolean {
+    /// A helper function for performing division and modulo operations.
+    fn e_shl_p(
+        &self,
+        sk: &ServerKey,
+        a: &[Ciphertext],
+        LSB: &Ciphertext,
+        result: &mut [Ciphertext],
+    ) {
+        for i in 1..a.len() {
+            result[i] = a[i].clone()
+        }
+        result[0] = LSB.clone();
+    }
+}
 impl Processor for ProcessorBoolean {
     fn e_and(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]) {
         let size: usize = a.len();
 
         for i in 0..size {
-            result[i] = sk.and(&a[i], &b[i]);
+            result[i] = self.pitch_trim_bit(sk, &sk.and(&a[i], &b[i]));
         }
 
         #[cfg(debug_assertions)]
@@ -33,7 +52,7 @@ impl Processor for ProcessorBoolean {
     }
 
     fn e_and_bit(&self, sk: &ServerKey, a: &Ciphertext, b: &Ciphertext) -> Ciphertext {
-        let result: Ciphertext = sk.and(a, b);
+        let result: Ciphertext = self.pitch_trim_bit(sk, &sk.and(a, b));
 
         #[cfg(debug_assertions)]
         {
@@ -59,7 +78,7 @@ impl Processor for ProcessorBoolean {
         );
 
         for i in index_low..index_high {
-            result[i] = sk.and(&a[i], &b[i]);
+            result[i] = self.pitch_trim_bit(sk,&sk.and(&a[i], &b[i]));
         }
 
         #[cfg(debug_assertions)]
@@ -86,7 +105,7 @@ impl Processor for ProcessorBoolean {
     fn e_or(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]) {
         let size: usize = a.len();
         for i in 0..size {
-            result[i] = sk.or(&a[i], &b[i]);
+            result[i] = self.pitch_trim_bit(sk,&sk.or(&a[i], &b[i]));
         }
 
         #[cfg(debug_assertions)]
@@ -96,7 +115,7 @@ impl Processor for ProcessorBoolean {
     }
 
     fn e_or_bit(&self, sk: &ServerKey, a: &Ciphertext, b: &Ciphertext) -> Ciphertext {
-        let result: Ciphertext = sk.or(a, b);
+        let result: Ciphertext = self.pitch_trim_bit(sk,&sk.or(a, b));
 
         #[cfg(debug_assertions)]
         {
@@ -122,7 +141,7 @@ impl Processor for ProcessorBoolean {
         );
 
         for i in index_low..index_high {
-            result[i] = sk.or(&a[i], &b[i]);
+            result[i] = self.pitch_trim_bit(sk,&sk.or(&a[i], &b[i]));
         }
 
         #[cfg(debug_assertions)]
@@ -149,7 +168,7 @@ impl Processor for ProcessorBoolean {
     fn e_xor(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]) {
         let size: usize = a.len();
         for i in 0..size {
-            result[i] = sk.xor(&a[i], &b[i]);
+            result[i] = self.pitch_trim_bit(sk,&sk.xor(&a[i], &b[i]));
         }
 
         #[cfg(debug_assertions)]
@@ -159,7 +178,7 @@ impl Processor for ProcessorBoolean {
     }
 
     fn e_xor_bit(&self, sk: &ServerKey, a: &Ciphertext, b: &Ciphertext) -> Ciphertext {
-        let result: Ciphertext = sk.xor(a, b);
+        let result: Ciphertext = self.pitch_trim_bit(sk,&sk.xor(a, b));
 
         #[cfg(debug_assertions)]
         {
@@ -185,7 +204,7 @@ impl Processor for ProcessorBoolean {
         );
 
         for i in index_low..index_high {
-            result[i] = sk.xor(&a[i], &b[i]);
+            result[i] = self.pitch_trim_bit(sk,&sk.xor(&a[i], &b[i]));
         }
 
         #[cfg(debug_assertions)]
@@ -218,7 +237,7 @@ impl Processor for ProcessorBoolean {
     ) {
         let size: usize = a.len();
         for i in 0..size {
-            result[i] = sk.nand(&a[i], &b[i]);
+            result[i] = self.pitch_trim_bit(sk,&sk.nand(&a[i], &b[i]));
         }
 
         #[cfg(debug_assertions)]
@@ -228,7 +247,7 @@ impl Processor for ProcessorBoolean {
     }
 
     fn e_nand_bit(&self, sk: &ServerKey, a: &Ciphertext, b: &Ciphertext) -> Ciphertext {
-        let result: Ciphertext = sk.nand(a, b);
+        let result: Ciphertext = self.pitch_trim_bit(sk,&sk.nand(a, b));
 
         #[cfg(debug_assertions)]
         {
@@ -254,7 +273,7 @@ impl Processor for ProcessorBoolean {
         );
 
         for i in index_low..index_high {
-            result[i] = sk.nand(&a[i], &b[i]);
+            result[i] = self.pitch_trim_bit(sk,&sk.nand(&a[i], &b[i]));
         }
 
         #[cfg(debug_assertions)]
@@ -281,7 +300,7 @@ impl Processor for ProcessorBoolean {
     fn e_nor(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]) {
         let size: usize = a.len();
         for i in 0..size {
-            result[i] = sk.nor(&a[i], &b[i]);
+            result[i] = self.pitch_trim_bit(sk,&sk.nor(&a[i], &b[i]));
         }
 
         #[cfg(debug_assertions)]
@@ -317,7 +336,7 @@ impl Processor for ProcessorBoolean {
         );
 
         for i in index_low..index_high {
-            result[i] = sk.nor(&a[i], &b[i]);
+            result[i] = self.pitch_trim_bit(sk,&sk.nor(&a[i], &b[i]));
         }
 
         #[cfg(debug_assertions)]
@@ -350,7 +369,7 @@ impl Processor for ProcessorBoolean {
     ) {
         let size: usize = a.len();
         for i in 0..size {
-            result[i] = sk.xnor(&a[i], &b[i]);
+            result[i] = self.pitch_trim_bit(sk,&sk.xnor(&a[i], &b[i]));
         }
 
         #[cfg(debug_assertions)]
@@ -360,7 +379,7 @@ impl Processor for ProcessorBoolean {
     }
 
     fn e_xnor_bit(&self, sk: &ServerKey, a: &Ciphertext, b: &Ciphertext) -> Ciphertext {
-        let result: Ciphertext = sk.xnor(a, b);
+        let result: Ciphertext = self.pitch_trim_bit(sk,&sk.xnor(a, b));
 
         #[cfg(debug_assertions)]
         {
@@ -386,7 +405,7 @@ impl Processor for ProcessorBoolean {
         );
 
         for i in index_low..index_high {
-            result[i] = sk.xnor(&a[i], &b[i]);
+            result[i] = self.pitch_trim_bit(sk,&sk.xnor(&a[i], &b[i]));
         }
 
         #[cfg(debug_assertions)]
@@ -509,7 +528,9 @@ impl Processor for ProcessorBoolean {
         let size: usize = a.len();
         let mut temp: Vec<Ciphertext> = Vec::with_capacity(size);
 
-        result.iter().clone_from(&a.iter().clone());
+        for (r, q) in result.iter_mut().zip(a.iter()) {
+            r.clone_from(q);
+        }
 
         for i in 0..rot_amt {
             let lsb: Ciphertext = result[0].clone();
@@ -518,7 +539,9 @@ impl Processor for ProcessorBoolean {
             }
             temp[size - 1].clone_from(&lsb);
 
-            result.iter().clone_from(&temp.iter().clone());
+            for (r, q) in result.iter_mut().zip(temp.iter()) {
+                r.clone_from(q);
+            }
         }
     }
 
@@ -526,7 +549,9 @@ impl Processor for ProcessorBoolean {
         let size: usize = a.len();
         let mut temp: Vec<Ciphertext> = Vec::with_capacity(size);
 
-        result.iter().clone_from(&a.iter().clone());
+        for (r, q) in result.iter_mut().zip(a.iter()) {
+            r.clone_from(q);
+        }
 
         for i in 0..rot_amt {
             let msb: Ciphertext = result[size - 1].clone();
@@ -535,7 +560,9 @@ impl Processor for ProcessorBoolean {
             }
             temp[0].clone_from(&msb);
 
-            result.iter().clone_from(&temp.iter().clone());
+            for (r, q) in result.iter_mut().zip(temp.iter()) {
+                r.clone_from(q);
+            }
         }
     }
 
@@ -621,22 +648,22 @@ impl Processor for ProcessorBoolean {
         }
 
         // select desired output
-        if (select == 0) {
+        if select == 0 {
             // ecmpeq
             result[0].clone_from(&equal);
-        } else if (select == 1) {
+        } else if select == 1 {
             // ecmpl
             result[0].clone_from(&less_than);
-        } else if (select == 2) {
+        } else if select == 2 {
             // ecmpg
             result[0].clone_from(&greater_than);
-        } else if (select == 3) {
+        } else if select == 3 {
             // ecmpgeq
             result[0] = self.e_or_bit(sk, &equal, &greater_than);
-        } else if (select == 4) {
+        } else if select == 4 {
             // ecmpleq
             result[0] = self.e_or_bit(sk, &equal, &less_than);
-        } else if (select == 5) {
+        } else if select == 5 {
             // ecmpneq
             result[0] = self.e_not_bit(sk, &equal);
         }
@@ -684,7 +711,7 @@ impl Processor for ProcessorBoolean {
             // Calculate the difference
             result[i] = self.e_xor_bit(sk, &temp_0[i], &borrow[i - 1]);
 
-            if (i != size - 1) {
+            if i != size - 1 {
                 temp_2[i] = self.e_and_bit(sk, &temp_1[i], &b[i]);
                 temp_0[i] = self.e_not_bit(sk, &temp_0[i]);
                 temp_1[i] = self.e_and_bit(sk, &borrow[i - 1], &temp_0[i]);
@@ -788,7 +815,7 @@ impl Processor for ProcessorBoolean {
             sum.clone_from(&temp_sum);
         }
 
-        result.iter().clone_from(&sum.iter());
+        self.copy_to_from(result, &sum);
     }
 
     fn blake3(
@@ -811,13 +838,13 @@ impl Processor for ProcessorBoolean {
         let mut tmp_c: Vec<Ciphertext> = Vec::with_capacity(size);
         let mut tmp_d: Vec<Ciphertext> = Vec::with_capacity(size);
 
-        // Unpack the input
-        a.clone_from(&v[0].to_vec());
-        b.clone_from(&v[1].to_vec());
-        c.clone_from(&v[2].to_vec());
-        d.clone_from(&v[3].to_vec());
-        m0.clone_from(&msg[0].to_vec());
-        m1.clone_from(&msg[1].to_vec());
+        // Unpack the inputs
+        self.copy_to_from(&mut a, v[0]);
+        self.copy_to_from(&mut b, v[1]);
+        self.copy_to_from(&mut c, v[2]);
+        self.copy_to_from(&mut d, v[3]);
+        self.copy_to_from(&mut m0, msg[0]);
+        self.copy_to_from(&mut m1, msg[1]);
 
         // Step 1: a = a + b + m0
         // Step 1.1: a = a + b
@@ -861,28 +888,135 @@ impl Processor for ProcessorBoolean {
         self.e_xor(sk, &b, &c, &mut tmp_b);
         // Step 8.2: b = b >>> 7
         self.e_rot_r(sk, &tmp_b, 7, &mut b);
-        
-        result[0].iter().clone_from(&mut a.iter());
-        result[1].iter().clone_from(&mut b.iter());
-        result[2].iter().clone_from(&mut c.iter());
-        result[3].iter().clone_from(&mut d.iter());
-        
+
+        self.copy_to_from(result[0], &a);
+        self.copy_to_from(result[1], &b);
+        self.copy_to_from(result[2], &c);
+        self.copy_to_from(result[3], &d);
     }
 
-    fn max(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]) {
-        todo!()
+    fn max(&self, sk: &ServerKey, a: &Vec<&[Ciphertext]>, result: &mut [Ciphertext]) {
+        let size = a[0].len();
+        let mut max: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut selector: Ciphertext = sk.trivial_encrypt(false);
+        let mut current: Vec<Ciphertext> = Vec::with_capacity(size);
+
+        self.copy_to_from(&mut max, &a[0]);
+
+        for indx in 0..size {
+            for (x, y) in current.iter_mut().zip(a[indx].iter()) {
+                x.clone_from(y);
+            }
+
+            // tmps[0] is the result of the comparison: 0 if a is larger, 1 if b is larger
+            // select the max and copy it to the result
+            for i in 0..size {
+                selector = self.compare_bit(sk, &max[i], &current[i], &selector);
+            }
+            for i in 0..size {
+                result[i] = self.e_mux_bit(sk, &selector, &max[i], &current[i]);
+            }
+
+            self.copy_to_from(&mut max, result);
+        }
     }
 
-    fn min(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]) {
-        todo!()
+    fn min(&self, sk: &ServerKey, a: &Vec<&[Ciphertext]>, result: &mut [Ciphertext]) {
+        let size = a[0].len();
+        let mut min: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut selector: Ciphertext = sk.trivial_encrypt(false);
+        let mut current: Vec<Ciphertext> = Vec::with_capacity(size);
+
+        self.copy_to_from(&mut min, a[0]);
+
+        for indx in 0..size {
+            current.clone_from(&a[indx].to_vec());
+
+            // tmps[0] is the result of the comparison: 0 if a is larger, 1 if b is larger
+            // select the max and copy it to the result
+            for i in 0..size {
+                selector = self.compare_bit(sk, &min[i], &current[i], &selector);
+            }
+            for i in 0..size {
+                result[i] = self.e_mux_bit(sk, &selector, &current[i], &min[i]);
+            }
+
+            self.copy_to_from(&mut min, result)
+        }
     }
 
     fn relu(&self, sk: &ServerKey, a: &[Ciphertext], result: &mut [Ciphertext]) {
-        todo!()
+        let size = a.len();
+        let mut p2: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut p3: Vec<Ciphertext> = Vec::with_capacity(size);
+
+        p2[size - 1] = self.e_not_bit(sk, &a[size - 1]);
+
+        for i in 0..size - 1 {
+            p2[i] = sk.trivial_encrypt(false);
+        }
+
+        for i in 0..size {
+            p3[i] = p2[size - i - 1].clone();
+        }
+
+        self.multiplier(sk, &p3, &a, result);
     }
 
     fn div(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]) {
-        todo!()
+        let size = a.len();
+        //  Q is the dividend, copy the bits from a to Q
+        let mut Q: Vec<Ciphertext> = Vec::with_capacity(size);
+        // A is the remainder, initialize to 0
+        let mut A: Vec<Ciphertext> = Vec::with_capacity(size);
+        // M is the divisor, copy the bits from b to M
+        let mut M: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut MSB: Ciphertext;
+        let mut zero: Ciphertext = sk.trivial_encrypt(false);
+        let mut A_msb: Ciphertext = sk.trivial_encrypt(false);
+        let mut not_A_msb: Ciphertext = sk.trivial_encrypt(false);
+        let mut A_tmp: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut Q_tmp: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut A_m: Vec<Ciphertext> = Vec::with_capacity(size);
+
+        Q.clone_from(&a.to_vec());
+        M.clone_from(&b.to_vec());
+
+        for i in 0..size {
+            // Left shift Q, and replace the LSB with 0
+            self.e_shl_p(sk, &Q, &zero, &mut Q_tmp);
+
+            // Store the MSB
+            MSB = Q[size - 1].clone();
+
+            // Update Q after shifting
+            self.copy_to_from(&mut Q, &Q_tmp);
+
+            // Left shift A and replace the LSB with MSB from the previous step
+            self.e_shl_p(sk, &A, &MSB, &mut A_tmp);
+
+            // Compute A = A-M
+            self.subtracter(sk, &A_tmp, &M, &mut A);
+
+            // Get the MSB of A
+            A_msb = A[size - 1].clone();
+
+            // Compute Not(MSB of A)
+            not_A_msb = self.e_not_bit(sk, &A_msb);
+
+            // Replace the LSB of Q with NOT(MSB of A)
+            Q[0] = not_A_msb.clone();
+
+            // Compute A = A + M
+            self.adder(sk, &A, &M, &mut A_m);
+
+            // If (A[0] == 1), A = A + M. Else, A is not changed.
+            for i in 0..size {
+                A[i] = self.e_mux_bit(sk, &A_msb, &A_m[i], &A[i]);
+            }
+        }
+
+        self.copy_to_from(result, &Q);
     }
 
     fn modulo(
@@ -892,28 +1026,212 @@ impl Processor for ProcessorBoolean {
         b: &[Ciphertext],
         result: &mut [Ciphertext],
     ) {
-        todo!()
+        let size = a.len();
+        //  Q is the dividend, copy the bits from a to Q
+        let mut Q: Vec<Ciphertext> = Vec::with_capacity(size);
+        // A is the remainder, initialize to 0
+        let mut A: Vec<Ciphertext> = Vec::with_capacity(size);
+        // M is the divisor, copy the bits from b to M
+        let mut M: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut MSB: Ciphertext;
+        let mut zero: Ciphertext = sk.trivial_encrypt(false);
+        let mut A_msb: Ciphertext = sk.trivial_encrypt(false);
+        let mut not_A_msb: Ciphertext = sk.trivial_encrypt(false);
+        let mut A_tmp: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut Q_tmp: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut A_m: Vec<Ciphertext> = Vec::with_capacity(size);
+
+        Q.clone_from(&a.to_vec());
+        M.clone_from(&b.to_vec());
+
+        for i in 0..size {
+            // Left shift Q, and replace the LSB with 0
+            self.e_shl_p(sk, &Q, &zero, &mut Q_tmp);
+
+            // Store the MSB
+            MSB = Q[size - 1].clone();
+
+            // Update Q after shifting
+            self.copy_to_from(&mut Q, &Q_tmp);
+
+            // Left shift A and replace the LSB with MSB from the previous step
+            self.e_shl_p(sk, &A, &MSB, &mut A_tmp);
+
+            // Compute A = A-M
+            self.subtracter(sk, &A_tmp, &M, &mut A);
+
+            // Get the MSB of A
+            A_msb = A[size - 1].clone();
+
+            // Compute Not(MSB of A)
+            not_A_msb = self.e_not_bit(sk, &A_msb);
+
+            // Replace the LSB of Q with NOT(MSB of A)
+            Q[0] = not_A_msb.clone();
+
+            // Compute A = A + M
+            self.adder(sk, &A, &M, &mut A_m);
+
+            // If (A[0] == 1), A = A + M. Else, A is not changed.
+            for i in 0..size {
+                A[i] = self.e_mux_bit(sk, &A_msb, &A_m[i], &A[i]);
+            }
+        }
+
+        self.copy_to_from(result, &A);
     }
 
-    fn mean(&self, sk: &ServerKey, a: &[Ciphertext], count: usize, result: &mut [Ciphertext]) {
-        todo!()
+    fn mean(
+        &self,
+        sk: &ServerKey,
+        a: &Vec<&[Ciphertext]>,
+        count: usize,
+        result: &mut [Ciphertext],
+    ) {
+        let size: usize = a[0].len();
+        let mut sum: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut tmp_sum: Vec<Ciphertext> = Vec::with_capacity(size);
+        self.copy_to_from(&mut sum, a[0]);
+
+        for i in 1..count {
+            self.adder(sk, &sum, a[i], &mut tmp_sum);
+            self.copy_to_from(&mut sum, &tmp_sum);
+        }
+
+        // Trivially encrypt the bits of count
+        let mut bits: Vec<bool> = Vec::new();
+        for i in (0..a[0].len()).rev() {
+            bits.push((count & (1 << i)) != 0);
+        }
+        let c_count: Vec<_> = bits.iter().map(|&bit| sk.trivial_encrypt(bit)).collect();
+
+        self.div(sk, &sum, &c_count, result);
     }
 
     fn e_sqrt(&self, sk: &ServerKey, a: &[Ciphertext], result: &mut [Ciphertext]) {
-        todo!()
+        let size: usize = a.len();
+
+        let mut x: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut y: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut x_y: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut x_2: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut two: Vec<Ciphertext> = Vec::with_capacity(size);
+
+        let mut n_iters: u8 = 0;
+        if size == 8 {
+            n_iters = 5;
+        } else if size == 16 {
+            n_iters = 10;
+        } else if size == 32 {
+            n_iters = 20;
+        } else {
+            eprintln!("An error occurred at `e_sqrt`, the supported data sizes 8, 16, and 32");
+            exit(1);
+        }
+        self.copy_to_from(&mut x, &a);
+
+        y[0] = sk.trivial_encrypt(true);
+        for i in 1..size {
+            y[i] = sk.trivial_encrypt(false);
+        }
+        for i in 0..size {
+            if i == 1 {
+                two[i] = sk.trivial_encrypt(true);
+            } else {
+                two[i] = sk.trivial_encrypt(false);
+            }
+        }
+
+        for i in 0..n_iters {
+            self.adder(sk, &x, &y, &mut x_y);
+            self.div(sk, &x_y, &two, &mut x);
+
+            if i != n_iters - 1 {
+                self.div(sk, &a, &x, &mut y);
+            }
+        }
+        self.copy_to_from(result, &x);
     }
 
-    fn variance(&self, sk: &ServerKey, a: &[Ciphertext], count: usize, result: &mut [Ciphertext]) {
-        todo!()
+    fn variance(
+        &self,
+        sk: &ServerKey,
+        a: &Vec<&[Ciphertext]>,
+        count: usize,
+        result: &mut [Ciphertext],
+    ) {
+        let size: usize = a[0].len();
+        let mut m: Vec<Ciphertext> = Vec::with_capacity(size);
+        self.mean(sk, a, count, &mut m);
+
+        let mut subs_squars: Vec<Vec<Ciphertext>> = Vec::with_capacity(count);
+        let mut squars: Vec<Vec<Ciphertext>> = Vec::with_capacity(count);
+        let mut subs: Vec<Vec<Ciphertext>> = Vec::with_capacity(count);
+        let mut sum: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut tmp_sum: Vec<Ciphertext> = Vec::with_capacity(size);
+
+        for _ in 0..count {
+            let sub: Vec<Ciphertext> = Vec::with_capacity(size);
+            let sqr: Vec<Ciphertext> = Vec::with_capacity(size);
+            subs.push(sub);
+            squars.push(sqr);
+        }
+
+        for i in 0..count {
+            self.subtracter(sk, a[i], &m, &mut subs[i]);
+        }
+
+        for i in 0..count {
+            self.multiplier(sk, &subs[i], &subs[i], &mut squars[i]);
+            subs_squars.push(squars[i].clone());
+        }
+
+        self.copy_to_from(&mut sum, &subs_squars[0]);
+
+        // sum the values
+        for i in 1..count {
+            self.adder(sk, &sum, &subs_squars[i], &mut tmp_sum);
+            self.copy_to_from(&mut sum, &tmp_sum);
+        }
+
+        // Trivially encrypt the bits of count
+        let mut bits: Vec<bool> = Vec::new();
+        for i in (0..a[0].len()).rev() {
+            bits.push((count & (1 << i)) != 0);
+        }
+        let c_count: Vec<_> = bits.iter().map(|&bit| sk.trivial_encrypt(bit)).collect();
+        self.div(sk, &sum, &c_count, result);
     }
 
     fn standard_deviation(
         &self,
         sk: &ServerKey,
-        a: &[Ciphertext],
+        a: &Vec<&[Ciphertext]>,
         count: usize,
         result: &mut [Ciphertext],
     ) {
-        todo!()
+        let mut var: Vec<Ciphertext> = Vec::with_capacity(a[0].len());
+        self.variance(sk, a, count, &mut var);
+        self.e_sqrt(sk, &var, result);
+    }
+
+    fn copy_to_from(&self, target: &mut [Ciphertext], source: &[Ciphertext]) {
+        for (r, q) in target.iter_mut().zip(source.iter()) {
+            r.clone_from(q);
+        }
+    }
+
+    fn pitch_trim(&self, sk: &ServerKey, ctxt: &mut [Ciphertext]) -> Vec<Ciphertext> {
+        let mut fresh: Vec<Ciphertext> = Vec::with_capacity(ctxt.len());
+        for c in ctxt {
+            let f = sk.bootstrap(c);
+            fresh.push(f);
+        }
+        fresh
+    }
+
+    fn pitch_trim_bit(&self, sk: &ServerKey, ctxt: &Ciphertext) -> Ciphertext {
+        let mut fresh: Ciphertext = sk.bootstrap(ctxt);
+        fresh
     }
 }

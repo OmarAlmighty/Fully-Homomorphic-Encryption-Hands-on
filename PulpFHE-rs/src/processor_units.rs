@@ -1,3 +1,4 @@
+#![allow(warnings)]
 //! # Description
 //! This module includes the implementation of the circuits (functional units) that
 //! the processor can perform on encrypted data. The gates operation are not bootstrapped.
@@ -269,9 +270,9 @@ pub trait Processor {
         result: &mut Vec<&mut [Ciphertext]>,
     );
 
-    fn max(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]);
+    fn max(&self, sk: &ServerKey, a: &Vec<&[Ciphertext]>, result: &mut [Ciphertext]);
 
-    fn min(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]);
+    fn min(&self, sk: &ServerKey, a: &Vec<&[Ciphertext]>, result: &mut [Ciphertext]);
 
     fn relu(&self, sk: &ServerKey, a: &[Ciphertext], result: &mut [Ciphertext]);
 
@@ -279,17 +280,22 @@ pub trait Processor {
 
     fn modulo(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]);
 
-    fn mean(&self, sk: &ServerKey, a: &[Ciphertext], count: usize, result: &mut [Ciphertext]);
+    fn mean(&self, sk: &ServerKey, a: &Vec<&[Ciphertext]>, count: usize, result: &mut [Ciphertext]);
 
     fn e_sqrt(&self, sk: &ServerKey, a: &[Ciphertext], result: &mut [Ciphertext]);
 
-    fn variance(&self, sk: &ServerKey, a: &[Ciphertext], count: usize, result: &mut [Ciphertext]);
+    fn variance(&self, sk: &ServerKey, a: &Vec<&[Ciphertext]>, count: usize, result: &mut [Ciphertext]);
 
     fn standard_deviation(
         &self,
         sk: &ServerKey,
-        a: &[Ciphertext],
+        a: &Vec<&[Ciphertext]>,
         count: usize,
         result: &mut [Ciphertext],
     );
+    
+    fn copy_to_from(&self, target: &mut [Ciphertext], source: &[Ciphertext]);
+    
+    fn pitch_trim(&self, sk: &ServerKey, ctxt: &mut[Ciphertext]) -> Vec<Ciphertext>;
+    fn pitch_trim_bit(&self, sk: &ServerKey, ctxt: &Ciphertext) -> Ciphertext;
 }

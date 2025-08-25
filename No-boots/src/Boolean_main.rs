@@ -1,7 +1,7 @@
 use std::time::Instant;
 use tfhe::boolean::gen_keys;
 use tfhe::boolean::prelude::*;
-use tfhe::boolean::server_key::RefreshMeEngine;
+use tfhe::boolean::server_key::RefreshEngine;
 
 fn full_adder(
     sk: &ServerKey,
@@ -11,10 +11,10 @@ fn full_adder(
 ) -> (Ciphertext, Ciphertext) {
     // sum = a ^ b ^ carry_in
     let a_xor_b = sk.xor(a, b);
-    let a_xor_b = sk.refresh_me(&a_xor_b);
+    let a_xor_b = sk.bootstrap(&a_xor_b);
 
     let sum = sk.xor(&a_xor_b, carry_in);
-    let sum = sk.refresh_me(&sum);
+    let sum = sk.bootstrap(&sum);
 
     // carry_out = (a & b) | (a & carry_in) | (b & carry_in)
     let a_and_b = sk.and(a, b);
@@ -27,10 +27,10 @@ fn full_adder(
     // let b_and_cin = sk.refresh_me(&b_and_cin);
 
     let temp = sk.or(&a_and_b, &a_and_cin);
-    let temp = sk.refresh_me(&temp);
+    let temp = sk.bootstrap(&temp);
 
     let carry_out = sk.or(&temp, &b_and_cin);
-    let carry_out = sk.refresh_me(&carry_out);
+    let carry_out = sk.bootstrap(&carry_out);
 
     (sum, carry_out)
 }
@@ -71,7 +71,7 @@ fn add_encrypted(sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext]) -> Vec<Ciph
 
 fn and_refresh(sk: &ServerKey, a: &Ciphertext, b: &Ciphertext) -> Ciphertext {
     let res = sk.and(a, b);
-    let res = sk.refresh_me(&res);
+    let res = sk.bootstrap(&res);
     res
 }
 fn multiply_encrypted(sk: &ServerKey, b: &[Ciphertext], a: &[Ciphertext]) -> Vec<Ciphertext> {
@@ -104,7 +104,21 @@ fn multiply_encrypted(sk: &ServerKey, b: &[Ciphertext], a: &[Ciphertext]) -> Vec
 }
 
 
-
+// fn main() {
+//     let (ck, sk) = gen_keys();
+//     let Q = vec![sk.trivial_encrypt(false), sk.trivial_encrypt(false), sk.trivial_encrypt(true)];
+//     let mut result = vec![Ciphertext::Trivial(false); Q.len()];
+// 
+//     for (r, q) in result.iter_mut().zip(Q.iter()) {
+//         r.clone_from(q);
+//     }
+// 
+//     for r in result{
+//         let x = ck.decrypt(&r);
+//         println!("{x}");
+//     }
+// 
+// }
 fn main() {
     // We generate a set of client/server keys, using the default parameters:
     let (client_key, server_key) = gen_keys();
