@@ -20,6 +20,7 @@ use tfhe::boolean::server_key::RefreshEngine;
 #[cfg(test)]
 mod test_processor_boolean_8;
 
+
 pub struct ProcessorBoolean;
 
 impl ProcessorBoolean {
@@ -119,7 +120,7 @@ impl Processor for ProcessorBoolean {
 
         #[cfg(debug_assertions)]
         {
-            println!("DEBUG: `e_xor_bit`");
+            println!("DEBUG: `e_or_bit`");
         }
         result
     }
@@ -732,13 +733,13 @@ impl Processor for ProcessorBoolean {
     ) {
         let size: usize = a.len();
 
-        let mut borrow: Vec<Ciphertext> = Vec::new();
-        let mut temp_0: Vec<Ciphertext> = Vec::new();
-        let mut temp_1: Vec<Ciphertext> = Vec::new();
-        let mut temp_2: Vec<Ciphertext> = Vec::new();
+        let mut borrow: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];;
+        let mut temp_0: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];;
+        let mut temp_1: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];;
+        let mut temp_2: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];;
 
         // Run half subtracter
-        result[0] = self.e_xor_bit(sk, &a[0], &b[9]);
+        result[0] = self.e_xor_bit(sk, &a[0], &b[0]);
         temp_0[0] = self.e_not_bit(sk, &a[0]);
         borrow[0] = self.e_and_bit(sk, &temp_0[0], &b[0]);
 
@@ -758,21 +759,126 @@ impl Processor for ProcessorBoolean {
         }
     }
 
+    // fn adder(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]) {
+    //     let size: usize = a.len();
+    //
+    //     let mut carry: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size + 1];
+    //     let mut temp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+    //
+    //     //initialize the first carry to 0
+    //     carry[0] = sk.trivial_encrypt(false);
+    //
+    //     self.e_xor(sk, &a, &b, &mut temp);
+    //
+    //     for i in 0..size {
+    //         result[i] = self.e_xor_bit(sk, &carry[i], &temp[i]);
+    //         carry[i + 1] = self.e_mux_bit(sk, &temp[i], &carry[i], &a[i]);
+    //     }
+    // }
+
+    // fn adder(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]) {
+    //     let size: usize = a.len();
+    //
+    //     let mut carry: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size + 1];
+    //     let mut temp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); 2];
+    //
+    //     //initialize the first carry to 0
+    //     carry[0] = sk.trivial_encrypt(false);
+    //
+    //     for i in 0..size {
+    //         temp[0] = self.e_xor_bit(sk, &a[i], &b[i]);
+    //         result[i] = self.e_xor_bit(sk, &carry[i], &temp[0]);
+    //         temp[1] = self.e_and_bit(sk, &a[i], &b[i]);
+    //         temp[0] = self.e_and_bit(sk, &carry[i], &temp[0]);
+    //         carry[i + 1] = self.e_or_bit(sk, &temp[0], &temp[1]);
+    //
+    //     }
+    // }
+
     fn adder(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]) {
         let size: usize = a.len();
-
-        let mut carry: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size + 1];
-        let mut temp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
-
-        //initialize the first carry to 0
-        carry[0] = sk.trivial_encrypt(false);
-
-        self.e_xor(sk, a, b, &mut temp);
-
-        for i in 0..size {
-            result[i] = self.e_xor_bit(sk, &carry[i], &temp[i]);
-            carry[i + 1] = self.e_mux_bit(sk, &temp[i], &carry[i], &a[i]);
+        if size < 2 {
+            // Handle edge case if necessary
+            return;
         }
+        let mag_size = size - 1;
+
+        let sign_a = a[size - 1].clone();
+        let sign_b = b[size - 1].clone();
+
+        let mut same_sign = self.e_xor_bit(sk, &sign_a, &sign_b);
+
+        let mag_a = &a[0..mag_size];
+        let mag_b = &b[0..mag_size];
+
+        // Compute add_mag: magnitude addition with initial carry 0
+        let mut add_mag: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); mag_size];
+        let mut temp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); mag_size];
+        self.e_xor(sk, mag_a, mag_b, &mut temp);
+        let mut carry: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); mag_size + 1];
+        carry[0] = sk.trivial_encrypt(false);
+        for i in 0..mag_size {
+            add_mag[i] = self.e_xor_bit(sk, &carry[i], &temp[i]);
+            carry[i + 1] = self.e_mux_bit(sk, &temp[i], &carry[i], &mag_a[i]);
+        }
+
+        // Compute inv_mag_b
+        let true_ct = sk.trivial_encrypt(true);
+        let mut inv_mag_b: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); mag_size];
+        for i in 0..mag_size {
+            inv_mag_b[i] = self.e_xor_bit(sk, &mag_b[i], &true_ct);
+        }
+
+        // Compute sub_mag_a_minus_b: mag_a - mag_b with initial carry 1
+        let mut sub_mag_a_minus_b: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); mag_size];
+        let mut temp_sub: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); mag_size];
+        self.e_xor(sk, mag_a, &inv_mag_b, &mut temp_sub);
+        let mut carry_sub: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); mag_size + 1];
+        carry_sub[0] = sk.trivial_encrypt(true);
+        for i in 0..mag_size {
+            sub_mag_a_minus_b[i] = self.e_xor_bit(sk, &carry_sub[i], &temp_sub[i]);
+            carry_sub[i + 1] = self.e_mux_bit(sk, &temp_sub[i], &carry_sub[i], &mag_a[i]);
+        }
+        let is_a_ge_b = carry_sub[mag_size].clone();
+
+        // Larger and smaller
+        let mut larger_mag: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); mag_size];
+        let mut smaller_mag: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); mag_size];
+        for i in 0..mag_size {
+            larger_mag[i] = self.e_mux_bit(sk, &is_a_ge_b, &mag_a[i], &mag_b[i]);
+            smaller_mag[i] = self.e_mux_bit(sk, &is_a_ge_b, &mag_b[i], &mag_a[i]);
+        }
+        let mut larger_sign = self.e_mux_bit(sk, &is_a_ge_b, &sign_a, &sign_b);
+
+        // Compute inv_smaller
+        let mut inv_smaller: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); mag_size];
+        for i in 0..mag_size {
+            inv_smaller[i] = self.e_xor_bit(sk, &smaller_mag[i], &true_ct);
+        }
+
+        // Compute sub_mag: larger_mag - smaller_mag with initial carry 1
+        let mut sub_mag: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); mag_size];
+        let mut temp_diff: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); mag_size];
+        self.e_xor(sk, &larger_mag, &inv_smaller, &mut temp_diff);
+        let mut carry_diff: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); mag_size + 1];
+        carry_diff[0] = sk.trivial_encrypt(true);
+        for i in 0..mag_size {
+            sub_mag[i] = self.e_xor_bit(sk, &carry_diff[i], &temp_diff[i]);
+            carry_diff[i + 1] = self.e_mux_bit(sk, &temp_diff[i], &carry_diff[i], &larger_mag[i]);
+        }
+
+        // Final result_mag and result_sign
+        let mut result_mag: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); mag_size];
+        for i in 0..mag_size {
+            result_mag[i] = self.e_mux_bit(sk, &same_sign, &sub_mag[i], &add_mag[i]);
+        }
+        let result_sign = self.e_mux_bit(sk, &same_sign, &larger_sign, &sign_a);
+
+        // Set result
+        for i in 0..mag_size {
+            result[i] = result_mag[i].clone();
+        }
+        result[size - 1] = result_sign;
     }
 
     fn half_adder(
@@ -830,7 +936,7 @@ impl Processor for ProcessorBoolean {
         }
 
         // Compute sum
-        self.e_xor(sk, &carry, &temp, result);
+        self.e_xor_range(sk, &carry, &temp, result, 0, size);
     }
 
     fn multiplier(
@@ -951,11 +1057,11 @@ impl Processor for ProcessorBoolean {
             for i in 0..size {
                 selector = self.compare_bit(sk, &max[i], &current[i], &selector);
             }
-            for i in 0..size {
-                result[i] = self.e_mux_bit(sk, &selector, &max[i], &current[i]);
-            }
+            self.e_mux(sk, &selector, &max, &current, result);
 
-            self.copy_to_from(&mut max, result);
+            if indx != size - 1 {
+                self.copy_to_from(&mut max, result);
+            }
         }
     }
 
@@ -975,11 +1081,12 @@ impl Processor for ProcessorBoolean {
             for i in 0..size {
                 selector = self.compare_bit(sk, &min[i], &current[i], &selector);
             }
-            for i in 0..size {
-                result[i] = self.e_mux_bit(sk, &selector, &current[i], &min[i]);
-            }
 
-            self.copy_to_from(&mut min, result)
+            self.e_mux(sk, &selector, &current, &min, result);
+
+            if indx != size - 1 {
+                self.copy_to_from(&mut min, result);
+            }
         }
     }
 
@@ -1023,8 +1130,9 @@ impl Processor for ProcessorBoolean {
         let mut Q_tmp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
         let mut A_m: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
 
-        Q.clone_from(&a.to_vec());
-        M.clone_from(&b.to_vec());
+
+        self.copy_to_from(&mut Q, &a);
+        self.copy_to_from(&mut M, &b);
 
         for i in 0..size {
             // Left shift Q, and replace the LSB with 0
@@ -1085,8 +1193,8 @@ impl Processor for ProcessorBoolean {
         let mut Q_tmp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
         let mut A_m: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
 
-        Q.clone_from(&a.to_vec());
-        M.clone_from(&b.to_vec());
+        self.copy_to_from(&mut Q, &a);
+        self.copy_to_from(&mut M, &b);
 
         for i in 0..size {
             // Left shift Q, and replace the LSB with 0

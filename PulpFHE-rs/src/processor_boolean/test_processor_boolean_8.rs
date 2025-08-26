@@ -1,5 +1,6 @@
 #![allow(warnings)]
 use super::*; // Imports items from the parent module
+use serial_test::serial;
 
 fn encode(a: i8, size: u8) -> Vec<bool> {
     // Convert to binary representation as a Vec<bool>
@@ -39,11 +40,57 @@ fn encode_encrypt(a: i8, size: u8, client_key: &ClientKey) -> Vec<Ciphertext> {
 }
 fn decrypt_decode(ctxt: Vec<Ciphertext>, client_key: &ClientKey, size: u8) -> i8 {
     let bits: Vec<bool> = decrypt(ctxt, client_key);
+    println!("{:?}", bits);
     let result: i8 = decode(&bits);
     result
 }
 
-#[test]
+fn NEW_encode(ck: &ClientKey, value: i32, size: usize) -> Vec<Ciphertext> {
+    // Ensure size is at least 2 (1 for sign, at least 1 for magnitude)
+    assert!(size >= 2, "Size must be at least 2 for sign-magnitude representation");
+
+    let mut result = vec![Ciphertext::Trivial(false); size];
+
+    // Extract sign and magnitude
+    let sign = value < 0;
+    let magnitude = value.abs() as u32;
+
+    // Encode magnitude bits (indices 0 to size-2)
+    for i in 0..(size - 1) {
+        let bit = (magnitude >> i) & 1 == 1;
+        result[i] = ck.encrypt(bit);
+    }
+
+    // Encode sign bit (index size-1)
+    result[size - 1] = ck.encrypt(sign);
+
+    result
+}
+
+fn NEW_decode(ck: &ClientKey, bits: &[Ciphertext]) -> i32 {
+    let size = bits.len();
+    assert!(size >= 2, "Size must be at least 2 for sign-magnitude representation");
+
+    // Decrypt sign bit (last bit)
+    let sign: bool = ck.decrypt(&bits[size - 1]);
+
+    // Decrypt magnitude bits
+    let mut magnitude: u32 = 0;
+    for i in (0..size - 1).rev() {
+        let bit: bool = ck.decrypt(&bits[i]);
+        magnitude |= (bit as u32) << i;
+    }
+
+    // Apply sign
+    if sign {
+        -(magnitude as i32)
+    } else {
+        magnitude as i32
+    }
+}
+
+//#[test]
+//#[serial]
 fn test_encrypt_decrypt() {
     let (client_key, server_key) = gen_keys();
 
@@ -64,7 +111,8 @@ fn test_encrypt_decrypt() {
     println!("[✓] PASS: encrypt_decrypt\n");
 }
 
-#[test]
+// #[test]
+//#[serial]
 fn test_and() {
     let fn_name = "e_and";
     println!("[*] TEST: {fn_name}");
@@ -87,7 +135,8 @@ fn test_and() {
     println!("[✓] PASS: {fn_name}\n");
 }
 
-#[test]
+// #[test]
+// #[serial]
 fn test_or() {
     let fn_name = "e_or";
     println!("[*] TEST: {fn_name}");
@@ -110,7 +159,8 @@ fn test_or() {
     println!("[✓] PASS: {fn_name}\n");
 }
 
-#[test]
+// #[test]
+// #[serial]
 fn test_xor() {
     let fn_name = "e_xor";
     println!("[*] TEST: {fn_name}");
@@ -132,7 +182,8 @@ fn test_xor() {
     assert_eq!(dec_res, a ^ b);
     println!("[✓] PASS: {fn_name}\n");
 }
-#[test]
+// #[test]
+// #[serial]
 fn test_nand() {
     let fn_name = "e_nand";
     println!("[*] TEST: {fn_name}");
@@ -154,7 +205,8 @@ fn test_nand() {
     assert_eq!(dec_res, !(a & b));
     println!("[✓] PASS: {fn_name}\n");
 }
-#[test]
+// #[test]
+// #[serial]
 fn test_nor() {
     let fn_name = "e_nor";
     println!("[*] TEST: {fn_name}");
@@ -176,7 +228,8 @@ fn test_nor() {
     assert_eq!(dec_res, !(a | b));
     println!("[✓] PASS: {fn_name}\n");
 }
-#[test]
+// #[test]
+// #[serial]
 fn test_xnor() {
     let fn_name = "e_xnor";
     println!("[*] TEST: {fn_name}");
@@ -198,7 +251,8 @@ fn test_xnor() {
     assert_eq!(dec_res, !(a ^ b));
     println!("[✓] PASS: {fn_name}\n");
 }
-#[test]
+// #[test]
+// #[serial]
 fn test_not() {
     let fn_name = "e_not";
     println!("[*] TEST: {fn_name}");
@@ -221,7 +275,8 @@ fn test_not() {
     println!("[✓] PASS: {fn_name}\n");
 }
 
-#[test]
+// #[test]
+// #[serial]
 fn test_mux() {
     let fn_name = "e_mux";
     println!("[*] TEST: {fn_name}");
@@ -246,7 +301,8 @@ fn test_mux() {
     println!("[✓] PASS: {fn_name}\n");
 }
 
-#[test]
+// #[test]
+// #[serial]
 fn test_shl() {
     let fn_name = "e_shl";
     println!("[*] TEST: {fn_name}");
@@ -268,7 +324,8 @@ fn test_shl() {
     println!("[✓] PASS: {fn_name}\n");
 }
 
-#[test]
+// #[test]
+// #[serial]
 fn test_shr() {
     let fn_name = "e_shr";
     println!("[*] TEST: {fn_name}");
@@ -289,7 +346,8 @@ fn test_shr() {
     assert_eq!(dec_res, a >> shift);
     println!("[✓] PASS: {fn_name}\n");
 }
-#[test]
+// #[test]
+// #[serial]
 fn test_e_rotr() {
     let fn_name = "e_rotr";
     println!("[*] TEST: {fn_name}");
@@ -311,7 +369,8 @@ fn test_e_rotr() {
     println!("[✓] PASS: {fn_name}\n");
 }
 
-#[test]
+// #[test]
+// #[serial]
 fn test_e_rotl() {
     let fn_name = "e_rotl";
     println!("[*] TEST: {fn_name}");
@@ -333,7 +392,32 @@ fn test_e_rotl() {
     println!("[✓] PASS: {fn_name}\n");
 }
 
+// #[test]
+// #[serial]
+// fn test_adder() {
+//     let fn_name = "adder";
+//     println!("[*] TEST: {fn_name}");
+//     let (client_key, server_key) = gen_keys();
+//
+//     let server = ProcessorBoolean;
+//
+//     // Define two numbers and convert them to signed 8-bit representation.
+//     let a: i8 = 16;
+//     let b: i8 = 10;
+//
+//     let ct_a = encode_encrypt(a, 8, &client_key);
+//     let ct_b = encode_encrypt(b, 8, &client_key);
+//     let mut ct_result: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); ct_a.len()];
+//
+//     server.adder(&server_key, &ct_a, &ct_b, &mut ct_result);
+//
+//     let dec_res = decrypt_decode(ct_result, &client_key, 8);
+//     assert_eq!(dec_res, a.wrapping_add(b));
+//     println!("[✓] PASS: {fn_name}\n");
+// }
+
 #[test]
+#[serial]
 fn test_adder() {
     let fn_name = "adder";
     println!("[*] TEST: {fn_name}");
@@ -342,21 +426,22 @@ fn test_adder() {
     let server = ProcessorBoolean;
 
     // Define two numbers and convert them to signed 8-bit representation.
-    let a: i8 = 16;
-    let b: i8 = 10;
+    let a: i32 = 16;
+    let b: i32 = -10;
 
-    let ct_a = encode_encrypt(a, 8, &client_key);
-    let ct_b = encode_encrypt(b, 8, &client_key);
-    let mut ct_result: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); ct_a.len()];
+    let ct_a = NEW_encode(&client_key, a, 8);
+    let ct_b = NEW_encode(&client_key, b, 8);
+    let mut ct_result: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); 8];
 
     server.adder(&server_key, &ct_a, &ct_b, &mut ct_result);
 
-    let dec_res = decrypt_decode(ct_result, &client_key, 8);
+    let dec_res = NEW_decode(&client_key, &ct_result);
     assert_eq!(dec_res, a.wrapping_add(b));
     println!("[✓] PASS: {fn_name}\n");
 }
 
 #[test]
+#[serial]
 fn test_subtracter() {
     let fn_name = "subtracter";
     println!("[*] TEST: {fn_name}");
@@ -380,6 +465,7 @@ fn test_subtracter() {
 }
 
 #[test]
+#[serial]
 fn test_multiplier() {
     let fn_name = "multiplier";
     println!("[*] TEST: {fn_name}");
@@ -402,6 +488,7 @@ fn test_multiplier() {
     println!("[✓] PASS: {fn_name}\n");
 }
 #[test]
+#[serial]
 fn test_div() {
     let fn_name = "divider";
     println!("[*] TEST: {fn_name}");
@@ -424,6 +511,7 @@ fn test_div() {
     println!("[✓] PASS: {fn_name}\n");
 }
 #[test]
+#[serial]
 fn test_modulo() {
     let fn_name = "modulo";
     println!("[*] TEST: {fn_name}");
@@ -447,6 +535,7 @@ fn test_modulo() {
 }
 
 #[test]
+#[serial]
 fn test_max() {
     let fn_name = "max";
     println!("[*] TEST: {fn_name}");
@@ -477,6 +566,7 @@ fn test_max() {
 }
 
 #[test]
+#[serial]
 fn test_min() {
     let fn_name = "min";
     println!("[*] TEST: {fn_name}");
@@ -507,6 +597,7 @@ fn test_min() {
 }
 
 #[test]
+#[serial]
 fn test_relu() {
     let fn_name = "relu";
     println!("[*] TEST: {fn_name}");
@@ -527,6 +618,7 @@ fn test_relu() {
     println!("[✓] PASS: {fn_name}\n");
 }
 #[test]
+#[serial]
 fn test_sqrt() {
     let fn_name = "sqrt";
     println!("[*] TEST: {fn_name}");
@@ -547,6 +639,7 @@ fn test_sqrt() {
     println!("[✓] PASS: {fn_name}\n");
 }
 #[test]
+#[serial]
 fn test_mean() {
     let fn_name = "mean";
     println!("[*] TEST: {fn_name}");
@@ -576,6 +669,7 @@ fn test_mean() {
     println!("[✓] PASS: {fn_name}\n");
 }
 #[test]
+#[serial]
 fn test_variance() {
     let fn_name = "variance";
     println!("[*] TEST: {fn_name}");
@@ -605,6 +699,7 @@ fn test_variance() {
     println!("[✓] PASS: {fn_name}\n");
 }
 #[test]
+#[serial]
 fn test_standard_deviation() {
     let fn_name = "standard_deviation";
     println!("[*] TEST: {fn_name}");

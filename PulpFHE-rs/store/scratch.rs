@@ -1,20 +1,16 @@
- fn rotl(&self, a: &[T], rot_amt: usize, result: &mut [T]) {
-        let size: usize = a.len();
-        let mut temp: Vec<T> = vec![T::Trivial(false); size];
+fn adder(&self, sk: &Key, a: &[bool], b: &[bool], result: &mut [bool]) {
+    let size: usize = a.len();
 
-        for (r, q) in result.iter_mut().zip(a.iter()) {
-            r.clone_from(q);
-        }
+    let mut carry: Vec<bool> = vec![false; size + 1];
+    let mut temp: Vec<T> = vec![false; size];
 
-        for i in 0..rot_amt {
-            let msb: T = result[size - 1].clone();
-            for j in 1..size {
-                temp[j].clone_from(&result[j - 1]);
-            }
-            temp[0].clone_from(&msb);
+    //initialize the first carry to 0
+    carry[0] = false;
 
-            for (r, q) in result.iter_mut().zip(temp.iter()) {
-                r.clone_from(q);
-            }
-        }
+    self.e_xor(sk, a, b, &mut temp);
+
+    for i in 0..size {
+        result[i] = self.e_xor(sk, &carry[i], &temp[i]);
+        carry[i + 1] = self.e_mux(sk, &temp[i], &carry[i], &a[i]);
     }
+}
