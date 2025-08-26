@@ -221,3 +221,72 @@ fn test_not() {
     println!("[✓] PASS: {fn_name}\n");
 }
 
+#[test]
+fn test_mux() {
+    let (client_key, server_key) = gen_keys();
+
+    let server = ProcessorBoolean;
+
+    // Define two numbers and convert them to signed 8-bit representation.
+    let a: i8 = 16;
+    let b: i8 = -10;
+    let c: bool = true;
+
+    let ct_a = encode_encrypt(a, 8, &client_key);
+    let ct_b = encode_encrypt(b, 8, &client_key);
+    let ct_c = client_key.encrypt(c);
+    let mut ct_result: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); ct_a.len()];
+
+    server.e_mux(&server_key, &ct_c, &ct_a, &ct_b, &mut ct_result);
+
+    let dec_res = decrypt_decode(ct_result, &client_key, 8);
+    let fn_name = "e_mux";
+    println!("[*] TEST: {fn_name}");
+    assert_eq!(dec_res, if c { a } else { b });
+    println!("[✓] PASS: {fn_name}\n");
+}
+
+#[test]
+fn test_left_shift() {
+    let (client_key, server_key) = gen_keys();
+
+    let server = ProcessorBoolean;
+
+    // Define number and shift amount
+    let a: i8 = 16;
+    let shift: u32 = 2;
+
+    let ct_a = encode_encrypt(a, 8, &client_key);
+    let mut ct_result: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); ct_a.len()];
+
+    server.e_left_shift(&server_key, &ct_a, shift, &mut ct_result);
+
+    let dec_res = decrypt_decode(ct_result, &client_key, 8);
+    let fn_name = "e_left_shift";
+    println!("[*] TEST: {fn_name}");
+    assert_eq!(dec_res, a << shift);
+    println!("[✓] PASS: {fn_name}\n");
+}
+
+#[test]
+fn test_right_shift() {
+    let (client_key, server_key) = gen_keys();
+
+    let server = ProcessorBoolean;
+
+    // Define number and shift amount
+    let a: i8 = 16;
+    let shift: u32 = 2;
+
+    let ct_a = encode_encrypt(a, 8, &client_key);
+    let mut ct_result: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); ct_a.len()];
+
+    server.e_right_shift(&server_key, &ct_a, shift, &mut ct_result);
+
+    let dec_res = decrypt_decode(ct_result, &client_key, 8);
+    let fn_name = "e_right_shift";
+    println!("[*] TEST: {fn_name}");
+    assert_eq!(dec_res, a >> shift);
+    println!("[✓] PASS: {fn_name}\n");
+}
+

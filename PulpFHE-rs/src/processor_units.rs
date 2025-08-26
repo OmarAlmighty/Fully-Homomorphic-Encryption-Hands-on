@@ -167,6 +167,43 @@ pub trait Processor {
         index_high: usize,
     );
 
+    /// Performs a left bitwise shift operation on an encrypted value.
+    ///
+    /// The `e_shl` function takes an encrypted array (`a`) represented as a slice of `Ciphertext`
+    /// and performs a left shift by `shift_amt` number of bits. The result of the operation
+    /// is stored in the provided mutable slice `result`. The size of `result` must be
+    /// sufficient to hold the shifted ciphertexts. Encryption-specific keys (`ServerKey`) 
+    /// are used to perform the operation safely in the cryptographic context.
+    ///
+    /// # Parameters
+    /// - `self`: The instance of the object that provides context for the operation.
+    /// - `sk`: A reference to a `ServerKey`, which contains cryptographic data required 
+    ///   to perform the operation securely.
+    /// - `a`: A slice of `Ciphertext` representing the encrypted input value(s) 
+    ///   that will be shifted.
+    /// - `shift_amt`: A `usize` value representing the number of bits to shift to the left.
+    /// - `result`: A mutable slice of `Ciphertext` where the result of the left shift
+    ///   operation will be stored.
+    ///
+    /// # Requirements
+    /// - The size of the `result` slice must be equal to or larger than the size of the input slice `a`.
+    ///   Failure to provide a sufficient-sized result slice may cause runtime issues.
+    /// - The `Ciphertext` values must be valid and consistent with the encryption context
+    ///   provided by the `ServerKey`.
+    ///
+    /// # Examples
+    /// ```rust
+    /// // Assuming `key` is a valid ServerKey and `cipher_a` is a vector of Ciphertext
+    /// // encrypted values.
+    /// let sk = &key;
+    /// let cipher_a = vec![...]; // Encrypted input
+    /// let mut result = vec![...]; // Encrypted output location
+    /// let shift_amount = 3; // Specify the shift amount
+    ///
+    /// e_shl(sk, &cipher_a, shift_amount, &mut result);
+    ///
+    /// // The `result` vector now holds the left-shifted encrypted values.
+    /// ```
     fn e_shl(&self, sk: &ServerKey, a: &[Ciphertext], shift_amt: usize, result: &mut [Ciphertext]);
 
     fn e_shr(&self, sk: &ServerKey, a: &[Ciphertext], shift_amt: usize, result: &mut [Ciphertext]);
