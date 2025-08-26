@@ -78,7 +78,7 @@ impl Processor for ProcessorBoolean {
         );
 
         for i in index_low..index_high {
-            result[i] = self.pitch_trim_bit(sk,&sk.and(&a[i], &b[i]));
+            result[i] = self.pitch_trim_bit(sk, &sk.and(&a[i], &b[i]));
         }
 
         #[cfg(debug_assertions)]
@@ -105,7 +105,7 @@ impl Processor for ProcessorBoolean {
     fn e_or(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]) {
         let size: usize = a.len();
         for i in 0..size {
-            result[i] = self.pitch_trim_bit(sk,&sk.or(&a[i], &b[i]));
+            result[i] = self.pitch_trim_bit(sk, &sk.or(&a[i], &b[i]));
         }
 
         #[cfg(debug_assertions)]
@@ -115,7 +115,7 @@ impl Processor for ProcessorBoolean {
     }
 
     fn e_or_bit(&self, sk: &ServerKey, a: &Ciphertext, b: &Ciphertext) -> Ciphertext {
-        let result: Ciphertext = self.pitch_trim_bit(sk,&sk.or(a, b));
+        let result: Ciphertext = self.pitch_trim_bit(sk, &sk.or(a, b));
 
         #[cfg(debug_assertions)]
         {
@@ -141,7 +141,7 @@ impl Processor for ProcessorBoolean {
         );
 
         for i in index_low..index_high {
-            result[i] = self.pitch_trim_bit(sk,&sk.or(&a[i], &b[i]));
+            result[i] = self.pitch_trim_bit(sk, &sk.or(&a[i], &b[i]));
         }
 
         #[cfg(debug_assertions)]
@@ -168,7 +168,7 @@ impl Processor for ProcessorBoolean {
     fn e_xor(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]) {
         let size: usize = a.len();
         for i in 0..size {
-            result[i] = self.pitch_trim_bit(sk,&sk.xor(&a[i], &b[i]));
+            result[i] = self.pitch_trim_bit(sk, &sk.xor(&a[i], &b[i]));
         }
 
         #[cfg(debug_assertions)]
@@ -178,7 +178,7 @@ impl Processor for ProcessorBoolean {
     }
 
     fn e_xor_bit(&self, sk: &ServerKey, a: &Ciphertext, b: &Ciphertext) -> Ciphertext {
-        let result: Ciphertext = self.pitch_trim_bit(sk,&sk.xor(a, b));
+        let result: Ciphertext = self.pitch_trim_bit(sk, &sk.xor(a, b));
 
         #[cfg(debug_assertions)]
         {
@@ -204,7 +204,7 @@ impl Processor for ProcessorBoolean {
         );
 
         for i in index_low..index_high {
-            result[i] = self.pitch_trim_bit(sk,&sk.xor(&a[i], &b[i]));
+            result[i] = self.pitch_trim_bit(sk, &sk.xor(&a[i], &b[i]));
         }
 
         #[cfg(debug_assertions)]
@@ -237,7 +237,7 @@ impl Processor for ProcessorBoolean {
     ) {
         let size: usize = a.len();
         for i in 0..size {
-            result[i] = self.pitch_trim_bit(sk,&sk.nand(&a[i], &b[i]));
+            result[i] = self.pitch_trim_bit(sk, &sk.nand(&a[i], &b[i]));
         }
 
         #[cfg(debug_assertions)]
@@ -247,7 +247,7 @@ impl Processor for ProcessorBoolean {
     }
 
     fn e_nand_bit(&self, sk: &ServerKey, a: &Ciphertext, b: &Ciphertext) -> Ciphertext {
-        let result: Ciphertext = self.pitch_trim_bit(sk,&sk.nand(a, b));
+        let result: Ciphertext = self.pitch_trim_bit(sk, &sk.nand(a, b));
 
         #[cfg(debug_assertions)]
         {
@@ -273,7 +273,7 @@ impl Processor for ProcessorBoolean {
         );
 
         for i in index_low..index_high {
-            result[i] = self.pitch_trim_bit(sk,&sk.nand(&a[i], &b[i]));
+            result[i] = self.pitch_trim_bit(sk, &sk.nand(&a[i], &b[i]));
         }
 
         #[cfg(debug_assertions)]
@@ -300,7 +300,7 @@ impl Processor for ProcessorBoolean {
     fn e_nor(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]) {
         let size: usize = a.len();
         for i in 0..size {
-            result[i] = self.pitch_trim_bit(sk,&sk.nor(&a[i], &b[i]));
+            result[i] = self.pitch_trim_bit(sk, &sk.nor(&a[i], &b[i]));
         }
 
         #[cfg(debug_assertions)]
@@ -336,7 +336,7 @@ impl Processor for ProcessorBoolean {
         );
 
         for i in index_low..index_high {
-            result[i] = self.pitch_trim_bit(sk,&sk.nor(&a[i], &b[i]));
+            result[i] = self.pitch_trim_bit(sk, &sk.nor(&a[i], &b[i]));
         }
 
         #[cfg(debug_assertions)]
@@ -369,7 +369,7 @@ impl Processor for ProcessorBoolean {
     ) {
         let size: usize = a.len();
         for i in 0..size {
-            result[i] = self.pitch_trim_bit(sk,&sk.xnor(&a[i], &b[i]));
+            result[i] = self.pitch_trim_bit(sk, &sk.xnor(&a[i], &b[i]));
         }
 
         #[cfg(debug_assertions)]
@@ -379,7 +379,7 @@ impl Processor for ProcessorBoolean {
     }
 
     fn e_xnor_bit(&self, sk: &ServerKey, a: &Ciphertext, b: &Ciphertext) -> Ciphertext {
-        let result: Ciphertext = self.pitch_trim_bit(sk,&sk.xnor(a, b));
+        let result: Ciphertext = self.pitch_trim_bit(sk, &sk.xnor(a, b));
 
         #[cfg(debug_assertions)]
         {
@@ -405,7 +405,7 @@ impl Processor for ProcessorBoolean {
         );
 
         for i in index_low..index_high {
-            result[i] = self.pitch_trim_bit(sk,&sk.xnor(&a[i], &b[i]));
+            result[i] = self.pitch_trim_bit(sk, &sk.xnor(&a[i], &b[i]));
         }
 
         #[cfg(debug_assertions)]
@@ -480,7 +480,7 @@ impl Processor for ProcessorBoolean {
         }
     }
 
-    fn e_shl(&self, sk: &ServerKey, a: &[Ciphertext], shift_amt: usize, result: &mut [Ciphertext]) {
+    fn e_shl(&self, a: &[Ciphertext], shift_amt: usize, result: &mut [Ciphertext]) {
         let len = a.len();
         let shift = shift_amt % len; // Normalize shift if n > len
 
@@ -502,7 +502,7 @@ impl Processor for ProcessorBoolean {
         }
     }
 
-    fn e_shr(&self, sk: &ServerKey, a: &[Ciphertext], shift_amt: usize, result: &mut [Ciphertext]) {
+    fn e_shr(&self, a: &[Ciphertext], shift_amt: usize, result: &mut [Ciphertext]) {
         let len = a.len();
         let shift = shift_amt % len; // Normalize shift if n > len
 
@@ -524,58 +524,96 @@ impl Processor for ProcessorBoolean {
         }
     }
 
-    fn e_rot_r(&self, sk: &ServerKey, a: &[Ciphertext], rot_amt: usize, result: &mut [Ciphertext]) {
-        let size: usize = a.len();
-        let mut temp: Vec<Ciphertext> = Vec::with_capacity(size);
+    fn e_rotr(&self, a: &[Ciphertext], rot_amt: usize, result: &mut [Ciphertext]) {
+        // let size: usize = a.len();
+        // let mut temp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        //
+        // for (r, q) in result.iter_mut().zip(a.iter()) {
+        //     r.clone_from(q);
+        // }
+        //
+        // for i in 0..rot_amt {
+        //     let lsb: Ciphertext = result[0].clone();
+        //     for j in 0..size - 1 {
+        //         temp[j].clone_from(&result[j + 1]);
+        //     }
+        //     temp[size - 1].clone_from(&lsb);
+        //
+        //     for (r, q) in result.iter_mut().zip(temp.iter()) {
+        //         r.clone_from(q);
+        //     }
+        // }
+        let size = a.len();
+        if size == 0 || rot_amt == 0 {
+            // Copy input to result for empty arrays or no rotation
+            for (r, q) in result.iter_mut().zip(a.iter()) {
+                r.clone_from(q);
+            }
+            return;
+        }
 
+        // Normalize rotation amount to avoid unnecessary iterations
+        let rot_amt = rot_amt % size;
+
+        // Copy input to the result first
         for (r, q) in result.iter_mut().zip(a.iter()) {
             r.clone_from(q);
         }
 
-        for i in 0..rot_amt {
-            let lsb: Ciphertext = result[0].clone();
-            for j in 0..size - 1 {
-                temp[j].clone_from(&result[j + 1]);
-            }
-            temp[size - 1].clone_from(&lsb);
-
-            for (r, q) in result.iter_mut().zip(temp.iter()) {
-                r.clone_from(q);
-            }
-        }
+        // Perform the left rotation in-place
+        result.rotate_right(rot_amt);
     }
 
-    fn e_rot_l(&self, sk: &ServerKey, a: &[Ciphertext], rot_amt: usize, result: &mut [Ciphertext]) {
+    fn e_rotl(&self, a: &[Ciphertext], rot_amt: usize, result: &mut [Ciphertext]) {
         let size: usize = a.len();
-        let mut temp: Vec<Ciphertext> = Vec::with_capacity(size);
+        // let mut temp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        //
+        // for (r, q) in result.iter_mut().zip(a.iter()) {
+        //     r.clone_from(q);
+        // }
+        //
+        // for i in 0..rot_amt {
+        //     let msb: Ciphertext = result[size - 1].clone();
+        //     for j in 1..size {
+        //         temp[j].clone_from(&result[j - 1]);
+        //     }
+        //     temp[0].clone_from(&msb);
+        //
+        //     for (r, q) in result.iter_mut().zip(temp.iter()) {
+        //         r.clone_from(q);
+        //     }
+        // }
+        let size = a.len();
+        if size == 0 || rot_amt == 0 {
+            // Copy input to result for empty arrays or no rotation
+            for (r, q) in result.iter_mut().zip(a.iter()) {
+                r.clone_from(q);
+            }
+            return;
+        }
 
+        // Normalize rotation amount to avoid unnecessary iterations
+        let rot_amt = rot_amt % size;
+
+        // Copy input to the result first
         for (r, q) in result.iter_mut().zip(a.iter()) {
             r.clone_from(q);
         }
 
-        for i in 0..rot_amt {
-            let msb: Ciphertext = result[size - 1].clone();
-            for j in 1..size {
-                temp[j].clone_from(&result[j - 1]);
-            }
-            temp[0].clone_from(&msb);
-
-            for (r, q) in result.iter_mut().zip(temp.iter()) {
-                r.clone_from(q);
-            }
-        }
+        // Perform the left rotation in-place
+        result.rotate_left(rot_amt);
     }
 
     fn e_mux(
         &self,
         sk: &ServerKey,
-        selector: &[Ciphertext],
+        selector: &Ciphertext,
         ct_then: &[Ciphertext],
         ct_else: &[Ciphertext],
         result: &mut [Ciphertext],
     ) {
         for i in 0..ct_then.len() {
-            result[i] = sk.mux(&selector[i], &ct_then[i], &ct_else[i]);
+            result[i] = sk.mux(&selector, &ct_then[i], &ct_else[i]);
         }
     }
 
@@ -621,7 +659,7 @@ impl Processor for ProcessorBoolean {
         let mut not_b: Vec<Ciphertext> = Vec::new();
         self.e_not(sk, b, &mut not_b);
 
-        let mut temp: Vec<Ciphertext> = Vec::with_capacity(10);
+        let mut temp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); 10];
         let mut greater_than: Ciphertext = sk.trivial_encrypt(false);
         let mut less_than: Ciphertext = sk.trivial_encrypt(false);
         let mut equal: Ciphertext = sk.trivial_encrypt(true);
@@ -723,8 +761,8 @@ impl Processor for ProcessorBoolean {
     fn adder(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]) {
         let size: usize = a.len();
 
-        let mut carry: Vec<Ciphertext> = Vec::with_capacity(size + 1);
-        let mut temp: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut carry: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size + 1];
+        let mut temp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
 
         //initialize the first carry to 0
         carry[0] = sk.trivial_encrypt(false);
@@ -780,8 +818,8 @@ impl Processor for ProcessorBoolean {
         if size == 0 {
             return;
         }
-        let mut carry: Vec<Ciphertext> = Vec::with_capacity(size + 1);
-        let mut temp: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut carry: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size + 1];
+        let mut temp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
         carry[0] = sk.trivial_encrypt(false);
 
         self.e_xor(sk, a, b, &mut temp);
@@ -803,9 +841,9 @@ impl Processor for ProcessorBoolean {
         result: &mut [Ciphertext],
     ) {
         let size: usize = a.len();
-        let mut tmp_array: Vec<Ciphertext> = Vec::with_capacity(size);
-        let mut sum: Vec<Ciphertext> = Vec::with_capacity(size);
-        let mut temp_sum: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut tmp_array: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        let mut sum: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        let mut temp_sum: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
         for i in 0..size {
             for j in 0..size - 1 {
                 tmp_array[j] = self.e_and_bit(sk, &a[i], &b[j]);
@@ -826,17 +864,17 @@ impl Processor for ProcessorBoolean {
         result: &mut Vec<&mut [Ciphertext]>,
     ) {
         let size: usize = msg[0].len();
-        let mut a: Vec<Ciphertext> = Vec::with_capacity(size);
-        let mut b: Vec<Ciphertext> = Vec::with_capacity(size);
-        let mut c: Vec<Ciphertext> = Vec::with_capacity(size);
-        let mut d: Vec<Ciphertext> = Vec::with_capacity(size);
-        let mut m0: Vec<Ciphertext> = Vec::with_capacity(size);
-        let mut m1: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut a: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        let mut b: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        let mut c: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        let mut d: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        let mut m0: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        let mut m1: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
 
-        let mut tmp_a: Vec<Ciphertext> = Vec::with_capacity(size);
-        let mut tmp_b: Vec<Ciphertext> = Vec::with_capacity(size);
-        let mut tmp_c: Vec<Ciphertext> = Vec::with_capacity(size);
-        let mut tmp_d: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut tmp_a: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        let mut tmp_b: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        let mut tmp_c: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        let mut tmp_d: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
 
         // Unpack the inputs
         self.copy_to_from(&mut a, v[0]);
@@ -855,7 +893,7 @@ impl Processor for ProcessorBoolean {
         // Step 2: d = (d XOR a ) >>> 16
         // Step 2.1: d = d XOR a
         self.e_xor(sk, &d, &a, &mut tmp_d);
-        self.e_rot_r(sk, &tmp_d, 16, &mut d);
+        self.e_rotr(&tmp_d, 16, &mut d);
 
         // Step 3: c = c + d
         tmp_c.clone_from(&c);
@@ -865,7 +903,7 @@ impl Processor for ProcessorBoolean {
         // Step 4.1: b = b XOR c
         self.e_xor(sk, &b, &c, &mut tmp_b);
         // Step 4.2: b = b >>> 12
-        self.e_rot_r(sk, &tmp_b, 12, &mut b);
+        self.e_rotr(&tmp_b, 12, &mut b);
 
         // Step 5: a = a + b + m1
         // Step 5.1: a = a + b
@@ -877,7 +915,7 @@ impl Processor for ProcessorBoolean {
         // Step 6.1: d = d XOR a
         self.e_xor(sk, &d, &a, &mut tmp_d);
         // Step 6.2: d = d >>> 8
-        self.e_rot_r(sk, &tmp_d, 8, &mut d);
+        self.e_rotr(&tmp_d, 8, &mut d);
 
         // Step 7: c = c + d
         tmp_c.clone_from(&c);
@@ -887,7 +925,7 @@ impl Processor for ProcessorBoolean {
         // Step 8.1: b = b XOR c
         self.e_xor(sk, &b, &c, &mut tmp_b);
         // Step 8.2: b = b >>> 7
-        self.e_rot_r(sk, &tmp_b, 7, &mut b);
+        self.e_rotr(&tmp_b, 7, &mut b);
 
         self.copy_to_from(result[0], &a);
         self.copy_to_from(result[1], &b);
@@ -897,9 +935,9 @@ impl Processor for ProcessorBoolean {
 
     fn max(&self, sk: &ServerKey, a: &Vec<&[Ciphertext]>, result: &mut [Ciphertext]) {
         let size = a[0].len();
-        let mut max: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut max: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
         let mut selector: Ciphertext = sk.trivial_encrypt(false);
-        let mut current: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut current: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
 
         self.copy_to_from(&mut max, &a[0]);
 
@@ -923,9 +961,9 @@ impl Processor for ProcessorBoolean {
 
     fn min(&self, sk: &ServerKey, a: &Vec<&[Ciphertext]>, result: &mut [Ciphertext]) {
         let size = a[0].len();
-        let mut min: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut min: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
         let mut selector: Ciphertext = sk.trivial_encrypt(false);
-        let mut current: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut current: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
 
         self.copy_to_from(&mut min, a[0]);
 
@@ -947,8 +985,8 @@ impl Processor for ProcessorBoolean {
 
     fn relu(&self, sk: &ServerKey, a: &[Ciphertext], result: &mut [Ciphertext]) {
         let size = a.len();
-        let mut p2: Vec<Ciphertext> = Vec::with_capacity(size);
-        let mut p3: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut p2: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        let mut p3: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
 
         p2[size - 1] = self.e_not_bit(sk, &a[size - 1]);
 
@@ -963,21 +1001,27 @@ impl Processor for ProcessorBoolean {
         self.multiplier(sk, &p3, &a, result);
     }
 
-    fn div(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]) {
+    fn divider(
+        &self,
+        sk: &ServerKey,
+        a: &[Ciphertext],
+        b: &[Ciphertext],
+        result: &mut [Ciphertext],
+    ) {
         let size = a.len();
         //  Q is the dividend, copy the bits from a to Q
-        let mut Q: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut Q: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
         // A is the remainder, initialize to 0
-        let mut A: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut A: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
         // M is the divisor, copy the bits from b to M
-        let mut M: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut M: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
         let mut MSB: Ciphertext;
         let mut zero: Ciphertext = sk.trivial_encrypt(false);
         let mut A_msb: Ciphertext = sk.trivial_encrypt(false);
         let mut not_A_msb: Ciphertext = sk.trivial_encrypt(false);
-        let mut A_tmp: Vec<Ciphertext> = Vec::with_capacity(size);
-        let mut Q_tmp: Vec<Ciphertext> = Vec::with_capacity(size);
-        let mut A_m: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut A_tmp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        let mut Q_tmp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        let mut A_m: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
 
         Q.clone_from(&a.to_vec());
         M.clone_from(&b.to_vec());
@@ -1028,18 +1072,18 @@ impl Processor for ProcessorBoolean {
     ) {
         let size = a.len();
         //  Q is the dividend, copy the bits from a to Q
-        let mut Q: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut Q: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
         // A is the remainder, initialize to 0
-        let mut A: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut A: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
         // M is the divisor, copy the bits from b to M
-        let mut M: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut M: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
         let mut MSB: Ciphertext;
         let mut zero: Ciphertext = sk.trivial_encrypt(false);
         let mut A_msb: Ciphertext = sk.trivial_encrypt(false);
         let mut not_A_msb: Ciphertext = sk.trivial_encrypt(false);
-        let mut A_tmp: Vec<Ciphertext> = Vec::with_capacity(size);
-        let mut Q_tmp: Vec<Ciphertext> = Vec::with_capacity(size);
-        let mut A_m: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut A_tmp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        let mut Q_tmp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        let mut A_m: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
 
         Q.clone_from(&a.to_vec());
         M.clone_from(&b.to_vec());
@@ -1089,8 +1133,8 @@ impl Processor for ProcessorBoolean {
         result: &mut [Ciphertext],
     ) {
         let size: usize = a[0].len();
-        let mut sum: Vec<Ciphertext> = Vec::with_capacity(size);
-        let mut tmp_sum: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut sum: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        let mut tmp_sum: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
         self.copy_to_from(&mut sum, a[0]);
 
         for i in 1..count {
@@ -1105,17 +1149,17 @@ impl Processor for ProcessorBoolean {
         }
         let c_count: Vec<_> = bits.iter().map(|&bit| sk.trivial_encrypt(bit)).collect();
 
-        self.div(sk, &sum, &c_count, result);
+        self.divider(sk, &sum, &c_count, result);
     }
 
-    fn e_sqrt(&self, sk: &ServerKey, a: &[Ciphertext], result: &mut [Ciphertext]) {
+    fn sqrt(&self, sk: &ServerKey, a: &[Ciphertext], result: &mut [Ciphertext]) {
         let size: usize = a.len();
 
-        let mut x: Vec<Ciphertext> = Vec::with_capacity(size);
-        let mut y: Vec<Ciphertext> = Vec::with_capacity(size);
-        let mut x_y: Vec<Ciphertext> = Vec::with_capacity(size);
-        let mut x_2: Vec<Ciphertext> = Vec::with_capacity(size);
-        let mut two: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut x: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        let mut y: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        let mut x_y: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        let mut x_2: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        let mut two: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
 
         let mut n_iters: u8 = 0;
         if size == 8 {
@@ -1144,10 +1188,10 @@ impl Processor for ProcessorBoolean {
 
         for i in 0..n_iters {
             self.adder(sk, &x, &y, &mut x_y);
-            self.div(sk, &x_y, &two, &mut x);
+            self.divider(sk, &x_y, &two, &mut x);
 
             if i != n_iters - 1 {
-                self.div(sk, &a, &x, &mut y);
+                self.divider(sk, &a, &x, &mut y);
             }
         }
         self.copy_to_from(result, &x);
@@ -1161,18 +1205,18 @@ impl Processor for ProcessorBoolean {
         result: &mut [Ciphertext],
     ) {
         let size: usize = a[0].len();
-        let mut m: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut m: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
         self.mean(sk, a, count, &mut m);
 
         let mut subs_squars: Vec<Vec<Ciphertext>> = Vec::with_capacity(count);
         let mut squars: Vec<Vec<Ciphertext>> = Vec::with_capacity(count);
         let mut subs: Vec<Vec<Ciphertext>> = Vec::with_capacity(count);
-        let mut sum: Vec<Ciphertext> = Vec::with_capacity(size);
-        let mut tmp_sum: Vec<Ciphertext> = Vec::with_capacity(size);
+        let mut sum: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        let mut tmp_sum: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
 
         for _ in 0..count {
-            let sub: Vec<Ciphertext> = Vec::with_capacity(size);
-            let sqr: Vec<Ciphertext> = Vec::with_capacity(size);
+            let sub: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+            let sqr: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
             subs.push(sub);
             squars.push(sqr);
         }
@@ -1200,7 +1244,7 @@ impl Processor for ProcessorBoolean {
             bits.push((count & (1 << i)) != 0);
         }
         let c_count: Vec<_> = bits.iter().map(|&bit| sk.trivial_encrypt(bit)).collect();
-        self.div(sk, &sum, &c_count, result);
+        self.divider(sk, &sum, &c_count, result);
     }
 
     fn standard_deviation(
@@ -1210,9 +1254,9 @@ impl Processor for ProcessorBoolean {
         count: usize,
         result: &mut [Ciphertext],
     ) {
-        let mut var: Vec<Ciphertext> = Vec::with_capacity(a[0].len());
+        let mut var: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); a[0].len()];
         self.variance(sk, a, count, &mut var);
-        self.e_sqrt(sk, &var, result);
+        self.sqrt(sk, &var, result);
     }
 
     fn copy_to_from(&self, target: &mut [Ciphertext], source: &[Ciphertext]) {
@@ -1222,7 +1266,7 @@ impl Processor for ProcessorBoolean {
     }
 
     fn pitch_trim(&self, sk: &ServerKey, ctxt: &mut [Ciphertext]) -> Vec<Ciphertext> {
-        let mut fresh: Vec<Ciphertext> = Vec::with_capacity(ctxt.len());
+        let mut fresh: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); ctxt.len()];
         for c in ctxt {
             let f = sk.bootstrap(c);
             fresh.push(f);

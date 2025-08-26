@@ -172,14 +172,12 @@ pub trait Processor {
     /// The `e_shl` function takes an encrypted array (`a`) represented as a slice of `Ciphertext`
     /// and performs a left shift by `shift_amt` number of bits. The result of the operation
     /// is stored in the provided mutable slice `result`. The size of `result` must be
-    /// sufficient to hold the shifted ciphertexts. Encryption-specific keys (`ServerKey`) 
+    /// sufficient to hold the shifted ciphertexts. Encryption-specific keys (`ServerKey`)
     /// are used to perform the operation safely in the cryptographic context.
     ///
     /// # Parameters
     /// - `self`: The instance of the object that provides context for the operation.
-    /// - `sk`: A reference to a `ServerKey`, which contains cryptographic data required 
-    ///   to perform the operation securely.
-    /// - `a`: A slice of `Ciphertext` representing the encrypted input value(s) 
+    /// - `a`: A slice of `Ciphertext` representing the encrypted input value(s)
     ///   that will be shifted.
     /// - `shift_amt`: A `usize` value representing the number of bits to shift to the left.
     /// - `result`: A mutable slice of `Ciphertext` where the result of the left shift
@@ -204,17 +202,17 @@ pub trait Processor {
     ///
     /// // The `result` vector now holds the left-shifted encrypted values.
     /// ```
-    fn e_shl(&self, sk: &ServerKey, a: &[Ciphertext], shift_amt: usize, result: &mut [Ciphertext]);
+    fn e_shl(&self, a: &[Ciphertext], shift_amt: usize, result: &mut [Ciphertext]);
 
-    fn e_shr(&self, sk: &ServerKey, a: &[Ciphertext], shift_amt: usize, result: &mut [Ciphertext]);
+    fn e_shr(&self, a: &[Ciphertext], shift_amt: usize, result: &mut [Ciphertext]);
 
-    fn e_rot_r(&self, sk: &ServerKey, a: &[Ciphertext], rot_amt: usize, result: &mut [Ciphertext]);
-    fn e_rot_l(&self, sk: &ServerKey, a: &[Ciphertext], rot_amt: usize, result: &mut [Ciphertext]);
+    fn e_rotr(&self, a: &[Ciphertext], rot_amt: usize, result: &mut [Ciphertext]);
+    fn e_rotl(&self, a: &[Ciphertext], rot_amt: usize, result: &mut [Ciphertext]);
 
     fn e_mux(
         &self,
         sk: &ServerKey,
-        selector: &[Ciphertext],
+        selector: &Ciphertext,
         ct_then: &[Ciphertext],
         ct_else: &[Ciphertext],
         result: &mut [Ciphertext],
@@ -313,15 +311,27 @@ pub trait Processor {
 
     fn relu(&self, sk: &ServerKey, a: &[Ciphertext], result: &mut [Ciphertext]);
 
-    fn div(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]);
+    fn divider(
+        &self,
+        sk: &ServerKey,
+        a: &[Ciphertext],
+        b: &[Ciphertext],
+        result: &mut [Ciphertext],
+    );
 
     fn modulo(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]);
 
     fn mean(&self, sk: &ServerKey, a: &Vec<&[Ciphertext]>, count: usize, result: &mut [Ciphertext]);
 
-    fn e_sqrt(&self, sk: &ServerKey, a: &[Ciphertext], result: &mut [Ciphertext]);
+    fn sqrt(&self, sk: &ServerKey, a: &[Ciphertext], result: &mut [Ciphertext]);
 
-    fn variance(&self, sk: &ServerKey, a: &Vec<&[Ciphertext]>, count: usize, result: &mut [Ciphertext]);
+    fn variance(
+        &self,
+        sk: &ServerKey,
+        a: &Vec<&[Ciphertext]>,
+        count: usize,
+        result: &mut [Ciphertext],
+    );
 
     fn standard_deviation(
         &self,
@@ -330,9 +340,9 @@ pub trait Processor {
         count: usize,
         result: &mut [Ciphertext],
     );
-    
+
     fn copy_to_from(&self, target: &mut [Ciphertext], source: &[Ciphertext]);
-    
-    fn pitch_trim(&self, sk: &ServerKey, ctxt: &mut[Ciphertext]) -> Vec<Ciphertext>;
+
+    fn pitch_trim(&self, sk: &ServerKey, ctxt: &mut [Ciphertext]) -> Vec<Ciphertext>;
     fn pitch_trim_bit(&self, sk: &ServerKey, ctxt: &Ciphertext) -> Ciphertext;
 }

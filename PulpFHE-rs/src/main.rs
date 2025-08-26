@@ -1,5 +1,3 @@
-extern crate alloc;
-
 mod processor_boolean;
 mod processor_units;
 
