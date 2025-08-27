@@ -261,6 +261,7 @@ pub trait Processor {
     );
 
     fn adder(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]);
+    fn sign_adder(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]);
 
     fn half_adder(
         &self,

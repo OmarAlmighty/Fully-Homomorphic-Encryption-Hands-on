@@ -8,3 +8,4 @@ tfhe = { version = "1.3.3", features = ["boolean", "shortint"] }
 
 [dev-dependencies]
 serial_test = "*"
+rand = "0.8"

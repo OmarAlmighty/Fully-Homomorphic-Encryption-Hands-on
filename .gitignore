@@ -11,3 +11,6 @@ No-boots/.DS_Store
 .DS_Store
 /PulpFHE-rs/target
 /PulpFHE-rs/target
+/PulpFHE-rs/target
+PulpFHE-rs/Cargo.lock
+PulpFHE-rs/Cargo.lock

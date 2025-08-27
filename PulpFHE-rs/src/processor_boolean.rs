@@ -20,7 +20,6 @@ use tfhe::boolean::server_key::RefreshEngine;
 #[cfg(test)]
 mod test_processor_boolean_8;
 
-
 pub struct ProcessorBoolean;
 
 impl ProcessorBoolean {
@@ -36,6 +35,325 @@ impl ProcessorBoolean {
             result[i] = a[i].clone()
         }
         result[0] = LSB.clone();
+    }
+
+    /// Tracking functions
+
+    fn ptxt_and(&self, a: &[bool], b: &[bool], result: &mut [bool]) {
+        let size: usize = a.len();
+
+        for i in 0..size {
+            result[i] = a[i] & b[i];
+        }
+    }
+    fn ptxt_or(&self, a: &[bool], b: &[bool], result: &mut [bool]) {
+        let size: usize = a.len();
+
+        for i in 0..size {
+            result[i] = a[i] | b[i];
+        }
+    }
+
+    fn ptxt_xor(&self, a: &[bool], b: &[bool], result: &mut [bool]) {
+        let size: usize = a.len();
+
+        for i in 0..size {
+            result[i] = a[i] ^ b[i];
+        }
+    }
+    fn ptxt_not(&self, a: &[bool], result: &mut [bool]) {
+        let size: usize = a.len();
+
+        for i in 0..size {
+            result[i] = !a[i];
+        }
+    }
+
+    fn ptxt_nand(&self, a: &[bool], b: &[bool], result: &mut [bool]) {
+        let size: usize = a.len();
+
+        for i in 0..size {
+            result[i] = !(a[i] & b[i]);
+        }
+    }
+    fn ptxt_nor(&self, a: &[bool], b: &[bool], result: &mut [bool]) {
+        let size: usize = a.len();
+
+        for i in 0..size {
+            result[i] = !(a[i] | b[i]);
+        }
+    }
+
+    fn ptxt_xnor(&self, a: &[bool], b: &[bool], result: &mut [bool]) {
+        let size: usize = a.len();
+
+        for i in 0..size {
+            result[i] = !(a[i] ^ b[i]);
+        }
+    }
+
+    fn ptxt_and_bit(&self, a: bool, b: bool) -> bool {
+        let result = a & b;
+        result
+    }
+
+    fn ptxt_or_bit(&self, a: bool, b: bool) -> bool {
+        let result = a | b;
+        result
+    }
+
+    fn ptxt_not_bit(&self, a: bool) -> bool {
+        let result = !a;
+        result
+    }
+
+    fn ptxt_xor_bit(&self, a: bool, b: bool) -> bool {
+        let result = a ^ b;
+        result
+    }
+
+    fn ptxt_nand_bit(&self, a: bool, b: bool) -> bool {
+        let result = !(a & b);
+        result
+    }
+
+    fn ptxt_nor_bit(&self, a: bool, b: bool) -> bool {
+        let result = !(a | b);
+        result
+    }
+
+    fn ptxt_xnor_bit(&self, a: bool, b: bool) -> bool {
+        let result = !(a ^ b);
+        result
+    }
+
+    fn ptxt_and_range(
+        &self,
+        a: &[bool],
+        b: &[bool],
+        result: &mut [bool],
+        index_low: usize,
+        index_high: usize,
+    ) {
+        for i in index_low..index_high {
+            result[i] = (a[i] & b[i]);
+        }
+    }
+
+    fn ptxt_or_range(
+        &self,
+        a: &[bool],
+        b: &[bool],
+        result: &mut [bool],
+        index_low: usize,
+        index_high: usize,
+    ) {
+        for i in index_low..index_high {
+            result[i] = a[i] | b[i];
+        }
+    }
+
+    fn ptxt_xor_range(
+        &self,
+        a: &[bool],
+        b: &[bool],
+        result: &mut [bool],
+        index_low: usize,
+        index_high: usize,
+    ) {
+        for i in index_low..index_high {
+            result[i] = a[i] ^ b[i];
+        }
+    }
+
+    fn ptxt_not_range(&self, a: &[bool], result: &mut [bool], index_low: usize, index_high: usize) {
+        for i in index_low..index_high {
+            result[i] = !a[i];
+        }
+    }
+
+    fn ptxt_nand_range(
+        &self,
+        a: &[bool],
+        b: &[bool],
+        result: &mut [bool],
+        index_low: usize,
+        index_high: usize,
+    ) {
+        for i in index_low..index_high {
+            result[i] = !(a[i] & b[i]);
+        }
+    }
+
+    fn ptxt_nor_range(
+        &self,
+        a: &[bool],
+        b: &[bool],
+        result: &mut [bool],
+        index_low: usize,
+        index_high: usize,
+    ) {
+        for i in index_low..index_high {
+            result[i] = !(a[i] | b[i]);
+        }
+    }
+
+    fn ptxt_xnor_range(
+        &self,
+        a: &[bool],
+        b: &[bool],
+        result: &mut [bool],
+        index_low: usize,
+        index_high: usize,
+    ) {
+        for i in index_low..index_high {
+            result[i] = !(a[i] ^ b[i]);
+        }
+    }
+
+    fn ptxt_shl(&self, a: &[bool], shift_amt: usize, result: &mut [bool]) {
+        let len = a.len();
+        let shift = shift_amt % len;
+
+        if shift == 0 {
+            return;
+        }
+
+        let temp: Vec<bool> = a[..shift].to_vec();
+        for i in 0..(len - shift) {
+            result[i] = a[i + shift];
+        }
+        for i in 0..shift {
+            result[len - shift + i] = temp[i];
+        }
+    }
+
+    fn ptxt_shr(&self, a: &[bool], shift_amt: usize, result: &mut [bool]) {
+        let len = a.len();
+        let shift = shift_amt % len;
+
+        if shift == 0 {
+            return;
+        }
+
+        let temp: Vec<bool> = a[len - shift..].to_vec();
+        for i in (0..len - shift).rev() {
+            result[i + shift] = a[i];
+        }
+        for i in 0..shift {
+            result[i] = temp[i];
+        }
+    }
+
+    fn ptxt_rotr(&self, a: &[bool], rot_amt: usize, result: &mut [bool]) {
+        let size = a.len();
+        if size == 0 || rot_amt == 0 {
+            result.copy_from_slice(a);
+            return;
+        }
+
+        let rot_amt = rot_amt % size;
+        result.copy_from_slice(a);
+        result.rotate_right(rot_amt);
+    }
+
+    fn ptxt_rotl(&self, a: &[bool], rot_amt: usize, result: &mut [bool]) {
+        let size = a.len();
+        if size == 0 || rot_amt == 0 {
+            result.copy_from_slice(a);
+            return;
+        }
+
+        let rot_amt = rot_amt % size;
+        result.copy_from_slice(a);
+        result.rotate_left(rot_amt);
+    }
+
+    fn ptxt_mux(&self, selector: &bool, a: &[bool], b: &[bool], result: &mut [bool]) {
+        let size = a.len();
+        for i in 0..size {
+            result[i] = if *selector { a[i] } else { b[i] };
+        }
+    }
+
+    fn ptxt_mux_range(
+        &self,
+        selector: bool,
+        a: &[bool],
+        b: &[bool],
+        result: &mut [bool],
+        index_low: usize,
+        index_high: usize,
+    ) {
+        for i in index_low..index_high {
+            result[i] = if selector { a[i] } else { b[i] };
+        }
+    }
+
+    fn ptxt_mux_bit(&self, selector: bool, a: bool, b: bool) -> bool {
+        let result = if selector { a } else { b };
+        result
+    }
+
+    fn ptxt_adder(&self, a: &[bool], b: &[bool], result: &mut [bool]) {
+        let size: usize = a.len();
+        let mut carry = false;
+
+        for i in 0..size {
+            // Calculate sum and new carry for each bit position
+            let temp_sum = a[i] ^ b[i] ^ carry;
+            carry = (a[i] & b[i]) | (carry & (a[i] ^ b[i]));
+            result[i] = temp_sum;
+        }
+    }
+
+    fn ptxt_subtracter(&self, a: &[bool], b: &[bool], result: &mut [bool]) {
+        let size: usize = a.len();
+
+        self.print_ptxt_vector(a, "a");
+        self.print_ptxt_vector(b, "b");
+        let mut borrow: Vec<bool> = vec![false; size];
+        let mut temp_0: Vec<bool> = vec![false; size];
+        let mut temp_1: Vec<bool> = vec![false; size];
+        let mut temp_2: Vec<bool> = vec![false; size];
+
+        // Run half subtracter
+        result[0] = self.ptxt_xor_bit(a[0], b[0]);
+        temp_0[0] = self.ptxt_not_bit(a[0]);
+        borrow[0] = self.ptxt_and_bit(temp_0[0], b[0]);
+
+        self.ptxt_xor_range(a, b, &mut temp_0, 1, size);
+        self.ptxt_not_range(a, &mut temp_1, 1, size);
+
+        for i in 1..size {
+            // Calculate the difference
+            result[i] = self.ptxt_xor_bit(temp_0[i], borrow[i - 1]);
+            if i != size - 1 {
+                temp_2[i] = self.ptxt_and_bit(temp_1[i], b[i]);
+                temp_0[i] = self.ptxt_not_bit(temp_0[i]);
+                temp_1[i] = self.ptxt_and_bit(borrow[i - 1], temp_0[i]);
+                borrow[i] = self.ptxt_or_bit(temp_2[i], temp_1[i]);
+            }
+        }
+        self.print_ptxt_vector(&result, "result");
+    }
+
+    fn print_ptxt_vector(&self, a: &[bool], var_name: &str) {
+        let size: usize = a.len();
+        print!("[{}] = ", var_name);
+        for i in 0..size {
+            print!("{}", a[i] as u8);
+        }
+        println!("");
+    }
+    fn ptxt_vector_to_number(&self, a: &[bool]) -> u64 {
+        let size: usize = a.len();
+        let mut result: u64 = 0;
+        for i in 0..size {
+            result = result << 1;
+            result = result | if a[i] { 1 } else { 0 };
+        }
+        result
     }
 }
 impl Processor for ProcessorBoolean {
@@ -733,10 +1051,10 @@ impl Processor for ProcessorBoolean {
     ) {
         let size: usize = a.len();
 
-        let mut borrow: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];;
-        let mut temp_0: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];;
-        let mut temp_1: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];;
-        let mut temp_2: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];;
+        let mut borrow: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        let mut temp_0: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        let mut temp_1: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        let mut temp_2: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
 
         // Run half subtracter
         result[0] = self.e_xor_bit(sk, &a[0], &b[0]);
@@ -759,22 +1077,22 @@ impl Processor for ProcessorBoolean {
         }
     }
 
-    // fn adder(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]) {
-    //     let size: usize = a.len();
-    //
-    //     let mut carry: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size + 1];
-    //     let mut temp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
-    //
-    //     //initialize the first carry to 0
-    //     carry[0] = sk.trivial_encrypt(false);
-    //
-    //     self.e_xor(sk, &a, &b, &mut temp);
-    //
-    //     for i in 0..size {
-    //         result[i] = self.e_xor_bit(sk, &carry[i], &temp[i]);
-    //         carry[i + 1] = self.e_mux_bit(sk, &temp[i], &carry[i], &a[i]);
-    //     }
-    // }
+    fn adder(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]) {
+        let size: usize = a.len();
+
+        let mut carry: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size + 1];
+        let mut temp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+
+        //initialize the first carry to 0
+        carry[0] = sk.trivial_encrypt(false);
+
+        self.e_xor(sk, &a, &b, &mut temp);
+
+        for i in 0..size {
+            result[i] = self.e_xor_bit(sk, &carry[i], &temp[i]);
+            carry[i + 1] = self.e_mux_bit(sk, &temp[i], &carry[i], &a[i]);
+        }
+    }
 
     // fn adder(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]) {
     //     let size: usize = a.len();
@@ -795,16 +1113,22 @@ impl Processor for ProcessorBoolean {
     //     }
     // }
 
-    fn adder(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]) {
+    fn sign_adder(
+        &self,
+        sk: &ServerKey,
+        a: &[Ciphertext],
+        b: &[Ciphertext],
+        result: &mut [Ciphertext],
+    ) {
         let size: usize = a.len();
         if size < 2 {
             // Handle edge case if necessary
             return;
         }
-        let mag_size = size - 1;
+        let mag_size: usize = size - 1;
 
-        let sign_a = a[size - 1].clone();
-        let sign_b = b[size - 1].clone();
+        let sign_a: Ciphertext = a[size - 1].clone();
+        let sign_b: Ciphertext = b[size - 1].clone();
 
         let mut same_sign = self.e_xor_bit(sk, &sign_a, &sign_b);
 
@@ -823,20 +1147,21 @@ impl Processor for ProcessorBoolean {
         }
 
         // Compute inv_mag_b
-        let true_ct = sk.trivial_encrypt(true);
+        //let true_ct = sk.trivial_encrypt(true);
         let mut inv_mag_b: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); mag_size];
-        for i in 0..mag_size {
+        /*for i in 0..mag_size {
             inv_mag_b[i] = self.e_xor_bit(sk, &mag_b[i], &true_ct);
-        }
+        }*/
+        self.e_not(sk, mag_b, &mut inv_mag_b);
 
         // Compute sub_mag_a_minus_b: mag_a - mag_b with initial carry 1
-        let mut sub_mag_a_minus_b: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); mag_size];
+        //let mut sub_mag_a_minus_b: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); mag_size];
         let mut temp_sub: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); mag_size];
         self.e_xor(sk, mag_a, &inv_mag_b, &mut temp_sub);
         let mut carry_sub: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); mag_size + 1];
         carry_sub[0] = sk.trivial_encrypt(true);
         for i in 0..mag_size {
-            sub_mag_a_minus_b[i] = self.e_xor_bit(sk, &carry_sub[i], &temp_sub[i]);
+            //sub_mag_a_minus_b[i] = self.e_xor_bit(sk, &carry_sub[i], &temp_sub[i]);
             carry_sub[i + 1] = self.e_mux_bit(sk, &temp_sub[i], &carry_sub[i], &mag_a[i]);
         }
         let is_a_ge_b = carry_sub[mag_size].clone();
@@ -844,17 +1169,21 @@ impl Processor for ProcessorBoolean {
         // Larger and smaller
         let mut larger_mag: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); mag_size];
         let mut smaller_mag: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); mag_size];
-        for i in 0..mag_size {
+        self.e_mux(sk, &is_a_ge_b, &mag_a, &mag_b, &mut larger_mag);
+        self.e_mux(sk, &is_a_ge_b, &mag_b, &mag_a, &mut smaller_mag);
+
+        /* for i in 0..mag_size {
             larger_mag[i] = self.e_mux_bit(sk, &is_a_ge_b, &mag_a[i], &mag_b[i]);
             smaller_mag[i] = self.e_mux_bit(sk, &is_a_ge_b, &mag_b[i], &mag_a[i]);
-        }
+        }*/
         let mut larger_sign = self.e_mux_bit(sk, &is_a_ge_b, &sign_a, &sign_b);
 
         // Compute inv_smaller
         let mut inv_smaller: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); mag_size];
-        for i in 0..mag_size {
+        self.e_not(sk, &smaller_mag, &mut inv_smaller);
+        /*for i in 0..mag_size {
             inv_smaller[i] = self.e_xor_bit(sk, &smaller_mag[i], &true_ct);
-        }
+        }*/
 
         // Compute sub_mag: larger_mag - smaller_mag with initial carry 1
         let mut sub_mag: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); mag_size];
@@ -869,9 +1198,10 @@ impl Processor for ProcessorBoolean {
 
         // Final result_mag and result_sign
         let mut result_mag: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); mag_size];
-        for i in 0..mag_size {
+        self.e_mux(sk, &same_sign, &sub_mag, &add_mag, &mut result_mag);
+        /*for i in 0..mag_size {
             result_mag[i] = self.e_mux_bit(sk, &same_sign, &sub_mag[i], &add_mag[i]);
-        }
+        }*/
         let result_sign = self.e_mux_bit(sk, &same_sign, &larger_sign, &sign_a);
 
         // Set result
@@ -1129,7 +1459,6 @@ impl Processor for ProcessorBoolean {
         let mut A_tmp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
         let mut Q_tmp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
         let mut A_m: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
-
 
         self.copy_to_from(&mut Q, &a);
         self.copy_to_from(&mut M, &b);
