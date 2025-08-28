@@ -63,11 +63,15 @@ fn decrypt(ctxt: Vec<Ciphertext>, client_key: &ClientKey) -> Vec<bool> {
 
 // Function to encrypt each bit of a signed integer (i64) using the Boolean API
 pub fn encode_encrypt(num: i8, size: usize, ck: &ClientKey) -> Vec<Ciphertext> {
+    // Binary encoding is LSB...MSB
+
     let mut ciphertexts = Vec::with_capacity(size);
     for i in 0..size {
         let bit = ((num >> i) & 1) != 0;
+        print!("{}", bit as u8);
         ciphertexts.push(ck.encrypt(bit));
     }
+    println!("");
     ciphertexts
 }
 
@@ -76,15 +80,17 @@ pub fn decrypt_decode(ciphertexts: &[Ciphertext], client_key: &ClientKey, ) -> i
     let mut bits: u8 = 0;
     for (i, ct) in ciphertexts.iter().enumerate() {
         let bit = client_key.decrypt(ct);
+        print!("{}", bit as u8);
         if bit {
             bits |= 1u8 << i;
         }
     }
+    println!("");
     i8::from_ne_bytes(bits.to_ne_bytes())
 }
 
-//#[test]
-//#[serial]
+#[test]
+#[serial]
 fn test_encrypt_decrypt() {
     let (client_key, server_key) = gen_keys();
 
@@ -105,8 +111,8 @@ fn test_encrypt_decrypt() {
     println!("[✓] PASS: encrypt_decrypt\n");
 }
 
-// #[test]
-//#[serial]
+#[test]
+#[serial]
 fn test_and() {
     let fn_name = "e_and";
     println!("[*] TEST: {fn_name}");
@@ -131,8 +137,8 @@ fn test_and() {
     println!("[✓] PASS: {fn_name}\n");
 }
 
-// #[test]
-// #[serial]
+#[test]
+#[serial]
 fn test_or() {
     let fn_name = "e_or";
     println!("[*] TEST: {fn_name}");
@@ -157,8 +163,8 @@ fn test_or() {
     println!("[✓] PASS: {fn_name}\n");
 }
 
-// #[test]
-// #[serial]
+#[test]
+#[serial]
 fn test_xor() {
     let fn_name = "e_xor";
     println!("[*] TEST: {fn_name}");
@@ -182,8 +188,8 @@ fn test_xor() {
     assert_eq!(dec_res, a ^ b);
     println!("[✓] PASS: {fn_name}\n");
 }
-// #[test]
-// #[serial]
+#[test]
+#[serial]
 fn test_nand() {
     let fn_name = "e_nand";
     println!("[*] TEST: {fn_name}");
@@ -207,8 +213,8 @@ fn test_nand() {
     assert_eq!(dec_res, !(a & b));
     println!("[✓] PASS: {fn_name}\n");
 }
-// #[test]
-// #[serial]
+#[test]
+#[serial]
 fn test_nor() {
     let fn_name = "e_nor";
     println!("[*] TEST: {fn_name}");
@@ -232,8 +238,8 @@ fn test_nor() {
     assert_eq!(dec_res, !(a | b));
     println!("[✓] PASS: {fn_name}\n");
 }
-// #[test]
-// #[serial]
+#[test]
+#[serial]
 fn test_xnor() {
     let fn_name = "e_xnor";
     println!("[*] TEST: {fn_name}");
@@ -257,8 +263,8 @@ fn test_xnor() {
     assert_eq!(dec_res, !(a ^ b));
     println!("[✓] PASS: {fn_name}\n");
 }
-// #[test]
-// #[serial]
+#[test]
+#[serial]
 fn test_not() {
     let fn_name = "e_not";
     println!("[*] TEST: {fn_name}");
@@ -281,8 +287,8 @@ fn test_not() {
     println!("[✓] PASS: {fn_name}\n");
 }
 
-// #[test]
-// #[serial]
+#[test]
+#[serial]
 fn test_mux() {
     let fn_name = "e_mux";
     println!("[*] TEST: {fn_name}");
@@ -309,8 +315,8 @@ fn test_mux() {
     println!("[✓] PASS: {fn_name}\n");
 }
 
-// #[test]
-// #[serial]
+#[test]
+#[serial]
 fn test_shl() {
     let fn_name = "e_shl";
     println!("[*] TEST: {fn_name}");
@@ -335,8 +341,8 @@ fn test_shl() {
     println!("[✓] PASS: {fn_name}\n");
 }
 
-// #[test]
-// #[serial]
+#[test]
+#[serial]
 fn test_shr() {
     let fn_name = "e_shr";
     println!("[*] TEST: {fn_name}");
@@ -359,17 +365,18 @@ fn test_shr() {
     assert_eq!(dec_res, a >> shift);
     println!("[✓] PASS: {fn_name}\n");
 }
-// #[test]
-// #[serial]
+#[test]
+#[serial]
 fn test_e_rotr() {
     let fn_name = "e_rotr";
     println!("[*] TEST: {fn_name}");
     let (client_key, server_key) = gen_keys();
 
     let server = ProcessorBoolean;
+    let mut rng = rand::thread_rng();
 
     // Define number and shift amount
-    let a: i8 = 16;
+    let a: i8 = rng.gen_range(-50..50);
     let shift: usize = 2;
 
     let ct_a = encode_encrypt(a, 8, &client_key);
@@ -383,8 +390,8 @@ fn test_e_rotr() {
     println!("[✓] PASS: {fn_name}\n");
 }
 
-// #[test]
-// #[serial]
+#[test]
+#[serial]
 fn test_e_rotl() {
     let fn_name = "e_rotl";
     println!("[*] TEST: {fn_name}");
@@ -392,8 +399,10 @@ fn test_e_rotl() {
 
     let server = ProcessorBoolean;
 
+    let mut rng = rand::thread_rng();
+
     // Define number and shift amount
-    let a: i8 = 16;
+    let a: i8 = rng.gen_range(-50..50);
     let shift: usize = 2;
 
     let ct_a = encode_encrypt(a, 8, &client_key);

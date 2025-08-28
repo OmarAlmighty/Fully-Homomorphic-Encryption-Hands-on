@@ -800,50 +800,80 @@ impl Processor for ProcessorBoolean {
     }
 
     fn e_shl(&self, a: &[Ciphertext], shift_amt: usize, result: &mut [Ciphertext]) {
-        let len = a.len();
-        let shift = shift_amt % len; // Normalize shift if n > len
+        // Arithmetic shift left (same as logical shift left)
+        let mut a = a.to_vec();
+        a.reverse();
+        let mut tmp = a[shift_amt..].to_vec();
+        tmp.extend(vec![Ciphertext::Trivial(false); shift_amt]);
+        tmp.reverse();
+        self.copy_to_from(result, &tmp);
 
-        if shift == 0 {
-            return;
-        }
-
-        // Temporary buffer to store the first `shift` elements
-        let temp: Vec<Ciphertext> = a[..shift].to_vec();
-
-        // Shift remaining elements to the left
-        for i in 0..(len - shift) {
-            result[i].clone_from(&a[i + shift]);
-        }
-
-        // Move the saved elements to the end
-        for i in 0..shift {
-            result[len - shift + i].clone_from(&temp[i]);
-        }
+        // let len = a.len();
+        // let shift = shift_amt % len; // Normalize shift if n > len
+        //
+        // if shift == 0 {
+        //     return;
+        // }
+        // let mut a = a.to_vec();
+        // a.reverse();
+        // // Temporary buffer to store the first `shift` elements
+        // let mut temp: Vec<Ciphertext> = a[..shift].to_vec();
+        //
+        // // Shift remaining elements to the left
+        // for i in 0..(len - shift) {
+        //     result[i].clone_from(&a[i + shift]);
+        // }
+        //
+        // // Move the saved elements to the end
+        // for i in 0..shift {
+        //     result[len - shift + i].clone_from(&temp[i]);
+        // }
+        // result.reverse();
     }
 
     fn e_shr(&self, a: &[Ciphertext], shift_amt: usize, result: &mut [Ciphertext]) {
-        let len = a.len();
-        let shift = shift_amt % len; // Normalize shift if n > len
-
-        if shift == 0 {
+        if a.is_empty() {
+            self.copy_to_from(result, a);
             return;
         }
+        let mut a = a.to_vec();
+        a.reverse();
+        let mut shifted = vec![a[0].clone(); shift_amt]; // extend sign bit
+        shifted.extend_from_slice(&a[..a.len().saturating_sub(shift_amt)]);
+        shifted.reverse();
+        self.copy_to_from(result, &shifted);
 
-        // Temporary buffer to store the last `shift` elements
-        let temp: Vec<Ciphertext> = a[len - shift..].to_vec();
-
-        // Shift elements to the right
-        for i in (0..len - shift).rev() {
-            result[i + shift].clone_from(&a[i]);
-        }
-
-        // Move the saved elements to the front
-        for i in 0..shift {
-            result[i].clone_from(&temp[i]);
-        }
+        // let len = a.len();
+        // let shift = shift_amt % len; // Normalize shift if n > len
+        //
+        // if shift == 0 {
+        //     return;
+        // }
+        //
+        // let mut a = a.to_vec();
+        // a.reverse();
+        //
+        //
+        // // Temporary buffer to store the last `shift` elements
+        // let temp: Vec<Ciphertext> = a[..len - shift].to_vec();
+        //
+        // // Shift elements to the right
+        // for i in (0..len - shift) {
+        //     result[i + shift].clone_from(&a[i]);
+        // }
+        //
+        // // Move the saved elements to the front
+        // for i in 0..shift {
+        //     result[i].clone_from(&temp[i]);
+        // }
+        // result.reverse();
     }
 
     fn e_rotr(&self, a: &[Ciphertext], rot_amt: usize, result: &mut [Ciphertext]) {
+        let mut tmp = a.to_vec();
+        // The reverse of the operation because of the binary encoding is LSB...MSB
+        tmp.rotate_left(rot_amt % a.len());
+        self.copy_to_from(result, &tmp);
         // let size: usize = a.len();
         // let mut temp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
         //
@@ -862,65 +892,69 @@ impl Processor for ProcessorBoolean {
         //         r.clone_from(q);
         //     }
         // }
-        let size = a.len();
-        if size == 0 || rot_amt == 0 {
-            // Copy input to result for empty arrays or no rotation
-            for (r, q) in result.iter_mut().zip(a.iter()) {
-                r.clone_from(q);
-            }
-            return;
-        }
-
-        // Normalize rotation amount to avoid unnecessary iterations
-        let rot_amt = rot_amt % size;
-
-        // Copy input to the result first
-        for (r, q) in result.iter_mut().zip(a.iter()) {
-            r.clone_from(q);
-        }
-
-        // Perform the left rotation in-place
-        result.rotate_right(rot_amt);
-    }
-
-    fn e_rotl(&self, a: &[Ciphertext], rot_amt: usize, result: &mut [Ciphertext]) {
-        let size: usize = a.len();
-        // let mut temp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        // let size = a.len();
+        // if size == 0 || rot_amt == 0 {
+        //     // Copy input to result for empty arrays or no rotation
+        //     for (r, q) in result.iter_mut().zip(a.iter()) {
+        //         r.clone_from(q);
+        //     }
+        //     return;
+        // }
         //
+        // // Normalize rotation amount to avoid unnecessary iterations
+        // let rot_amt = rot_amt % size;
+        //
+        // // Copy input to the result first
         // for (r, q) in result.iter_mut().zip(a.iter()) {
         //     r.clone_from(q);
         // }
         //
-        // for i in 0..rot_amt {
-        //     let msb: Ciphertext = result[size - 1].clone();
-        //     for j in 1..size {
-        //         temp[j].clone_from(&result[j - 1]);
-        //     }
-        //     temp[0].clone_from(&msb);
-        //
-        //     for (r, q) in result.iter_mut().zip(temp.iter()) {
+        // // Perform the left rotation in-place
+        // result.rotate_right(rot_amt);
+    }
+
+    fn e_rotl(&self, a: &[Ciphertext], rot_amt: usize, result: &mut [Ciphertext]) {
+        let mut tmp = a.to_vec();
+        // The reverse of the operation because of the binary encoding is LSB...MSB
+        tmp.rotate_right(rot_amt % a.len());
+        self.copy_to_from(result, &tmp);
+
+        // let size: usize = a.len();
+        // // let mut temp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        // //
+        // // for (r, q) in result.iter_mut().zip(a.iter()) {
+        // //     r.clone_from(q);
+        // // }
+        // //
+        // // for i in 0..rot_amt {
+        // //     let msb: Ciphertext = result[size - 1].clone();
+        // //     for j in 1..size {
+        // //         temp[j].clone_from(&result[j - 1]);
+        // //     }
+        // //     temp[0].clone_from(&msb);
+        // //
+        // //     for (r, q) in result.iter_mut().zip(temp.iter()) {
+        // //         r.clone_from(q);
+        // //     }
+        // // }
+        // let size = a.len();
+        // if size == 0 || rot_amt == 0 {
+        //     // Copy input to result for empty arrays or no rotation
+        //     for (r, q) in result.iter_mut().zip(a.iter()) {
         //         r.clone_from(q);
         //     }
+        //     return;
         // }
-        let size = a.len();
-        if size == 0 || rot_amt == 0 {
-            // Copy input to result for empty arrays or no rotation
-            for (r, q) in result.iter_mut().zip(a.iter()) {
-                r.clone_from(q);
-            }
-            return;
-        }
-
-        // Normalize rotation amount to avoid unnecessary iterations
-        let rot_amt = rot_amt % size;
-
-        // Copy input to the result first
-        for (r, q) in result.iter_mut().zip(a.iter()) {
-            r.clone_from(q);
-        }
-
-        // Perform the left rotation in-place
-        result.rotate_left(rot_amt);
+        //
+        // // Normalize rotation amount to avoid unnecessary iterations
+        // let rot_amt = rot_amt % size;
+        //
+        // // Copy input to the result first
+        // for (r, q) in result.iter_mut().zip(a.iter()) {
+        //     r.clone_from(q);
+        // }
+        //
+        // // Perform the left rotation in-place
     }
 
     fn e_mux(
@@ -1093,25 +1127,6 @@ impl Processor for ProcessorBoolean {
             carry[i + 1] = self.e_mux_bit(sk, &temp[i], &carry[i], &a[i]);
         }
     }
-
-    // fn adder(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]) {
-    //     let size: usize = a.len();
-    //
-    //     let mut carry: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size + 1];
-    //     let mut temp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); 2];
-    //
-    //     //initialize the first carry to 0
-    //     carry[0] = sk.trivial_encrypt(false);
-    //
-    //     for i in 0..size {
-    //         temp[0] = self.e_xor_bit(sk, &a[i], &b[i]);
-    //         result[i] = self.e_xor_bit(sk, &carry[i], &temp[0]);
-    //         temp[1] = self.e_and_bit(sk, &a[i], &b[i]);
-    //         temp[0] = self.e_and_bit(sk, &carry[i], &temp[0]);
-    //         carry[i + 1] = self.e_or_bit(sk, &temp[0], &temp[1]);
-    //
-    //     }
-    // }
 
     fn sign_adder(
         &self,
