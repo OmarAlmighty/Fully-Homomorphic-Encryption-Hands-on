@@ -35,7 +35,7 @@ trait DefaultImplementation {
     type Engine: WithThreadLocalEngine;
 }
 
-pub trait RefreshMeEngine<C>{
+pub trait RefreshEngine<C>{
     fn bootstrap(&self, ctxt: C) -> Ciphertext;
 }
 mod implementation {
@@ -128,9 +128,9 @@ where
     }
 }
 
-impl<C> RefreshMeEngine<C> for ServerKey
+impl<C> RefreshEngine<C> for ServerKey
 where
-<Self as DefaultImplementation>::Engine: BootstrapperEngine<C, Self>, {
+    <Self as DefaultImplementation>::Engine: BootstrapperEngine<C, Self>, {
     fn bootstrap(&self, ctxt: C) -> Ciphertext {
         <Self as DefaultImplementation>::Engine::with_thread_local_mut(|engine| {
             engine.refresh_me(ctxt, self)

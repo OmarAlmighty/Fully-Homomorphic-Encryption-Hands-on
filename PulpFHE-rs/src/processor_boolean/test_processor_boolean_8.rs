@@ -48,83 +48,103 @@ fn decrypt(ctxt: Vec<Ciphertext>, client_key: &ClientKey) -> Vec<bool> {
 //     result
 // }
 
-fn encode_encrypt(value: i32, size: usize, ck: &ClientKey) -> Vec<Ciphertext> {
-    // Ensure size is at least 2 (1 for sign, at least 1 for magnitude)
-    assert!(
-        size >= 2,
-        "Size must be at least 2 for sign-magnitude representation"
-    );
+// fn encode_encrypt(value: i32, size: usize, ck: &ClientKey) -> Vec<Ciphertext> {
+//     // Ensure size is at least 2 (1 for sign, at least 1 for magnitude)
+//     assert!(
+//         size >= 2,
+//         "Size must be at least 2 for sign-magnitude representation"
+//     );
+//
+//     let mut result = vec![Ciphertext::Trivial(false); size];
+//
+//     let mut binary_string = format!("{:08b}", value);
+//     let binary_string: String = binary_string
+//         .chars()
+//         .rev() // Reverse the iterator to get characters from the end
+//         .take(size) // Take the last 'n' characters
+//         .collect::<String>() // Collect them into a new String
+//         .chars() // Convert back to char iterator to reverse again
+//         .rev() // Reverse to get the correct order
+//         .collect(); // Collect into the final String
+//     let binary = binary_string.chars().map(|c| c == '1').collect();
+//     println!("{:?}", binary);
+//     encrypt(binary, ck)
+//     // Extract sign and magnitude
+//     // let sign = value < 0;
+//     // let magnitude = value.abs() as u32;
+//     //
+//     // // Encode magnitude bits (indices 0 to size-2)
+//     // for i in 0..(size - 1) {
+//     //     let bit = (magnitude >> i) & 1 == 1;
+//     //     result[i] = ck.encrypt(bit);
+//     // }
+//     //
+//     // // Encode sign bit (index size-1)
+//     // result[size - 1] = ck.encrypt(sign);
+//     //
+//     // result.reverse();
+//     // result
+// }
+//
+// fn decrypt_decode(bits: &[Ciphertext], ck: &ClientKey) -> i32 {
+//     let size = bits.len();
+//     assert!(
+//         size >= 2,
+//         "Size must be at least 2 for sign-magnitude representation"
+//     );
+//
+//     let mut bits = bits.to_vec();
+//     bits.reverse();
+//     // Decrypt sign bit (last bit)
+//     let sign: bool = ck.decrypt(&bits[size - 1]);
+//
+//     // Decrypt magnitude bits
+//     let mut magnitude: u32 = 0;
+//     let mut binary_vector: Vec<bool> = vec![false; size];
+//     for i in (0..size-1).rev() {
+//         let bit: bool = ck.decrypt(&bits[i]);
+//         binary_vector.push(bit);
+//         //magnitude |= (bit as u32) << i;
+//     }
+//     let mut binary_string = String::new();
+//     for &b in &binary_vector {
+//         if b {
+//             binary_string.push('1');
+//         } else {
+//             binary_string.push('0');
+//         }
+//     }
+//     println!("{:?}", binary_string);
+//     i32::from_str_radix(binary_string.as_str(), 2).expect("REASON")
+//
+//     // // Apply sign
+//     // if sign {
+//     //     -(magnitude as i32)
+//     // } else {
+//     //     magnitude as i32
+//     // }
+// }
 
-    let mut result = vec![Ciphertext::Trivial(false); size];
-
-    let mut binary_string = format!("{:08b}", value);
-    let binary_string: String = binary_string
-        .chars()
-        .rev() // Reverse the iterator to get characters from the end
-        .take(size) // Take the last 'n' characters
-        .collect::<String>() // Collect them into a new String
-        .chars() // Convert back to char iterator to reverse again
-        .rev() // Reverse to get the correct order
-        .collect(); // Collect into the final String
-    let binary = binary_string.chars().map(|c| c == '1').collect();
-    println!("{:?}", binary);
-    encrypt(binary, ck)
-    // Extract sign and magnitude
-    // let sign = value < 0;
-    // let magnitude = value.abs() as u32;
-    //
-    // // Encode magnitude bits (indices 0 to size-2)
-    // for i in 0..(size - 1) {
-    //     let bit = (magnitude >> i) & 1 == 1;
-    //     result[i] = ck.encrypt(bit);
-    // }
-    //
-    // // Encode sign bit (index size-1)
-    // result[size - 1] = ck.encrypt(sign);
-    //
-    // result.reverse();
-    // result
+pub fn encode_encrypt(num: i32, size: usize, ck: &ClientKey) -> Vec<Ciphertext> {
+    let mut ciphertexts = Vec::with_capacity(size);
+    for i in 0..size {
+        let bit = ((num >> i) & 1) != 0;
+        ciphertexts.push(ck.encrypt(bit));
+    }
+    ciphertexts
 }
 
-fn decrypt_decode(bits: &[Ciphertext], ck: &ClientKey) -> i32 {
-    let size = bits.len();
-    assert!(
-        size >= 2,
-        "Size must be at least 2 for sign-magnitude representation"
-    );
-
-    let mut bits = bits.to_vec();
-    bits.reverse();
-    // Decrypt sign bit (last bit)
-    let sign: bool = ck.decrypt(&bits[size - 1]);
-
-    // Decrypt magnitude bits
-    let mut magnitude: u32 = 0;
-    let mut binary_vector: Vec<bool> = vec![false; size];
-    for i in (0..size-1).rev() {
-        let bit: bool = ck.decrypt(&bits[i]);
-        binary_vector.push(bit);
-        //magnitude |= (bit as u32) << i;
-    }
-    let mut binary_string = String::new();
-    for &b in &binary_vector {
-        if b {
-            binary_string.push('1');
-        } else {
-            binary_string.push('0');
+// Function to decrypt the ciphertext vector and reconstruct the signed integer (i64)
+pub fn decrypt_decode(ciphertexts: &[Ciphertext], client_key: &ClientKey, ) -> i32 {
+    let mut bits: u32 = 0;
+    for (i, ct) in ciphertexts.iter().enumerate() {
+        let bit = client_key.decrypt(ct);
+        if bit {
+            bits |= 1u32 << i;
         }
     }
-    println!("{:?}", binary_string);
-    i32::from_str_radix(binary_string.as_str(), 2).expect("REASON")
-
-    // // Apply sign
-    // if sign {
-    //     -(magnitude as i32)
-    // } else {
-    //     magnitude as i32
-    // }
+    i32::from_ne_bytes(bits.to_ne_bytes())
 }
-
 //#[test]
 //#[serial]
 fn test_encrypt_decrypt() {
