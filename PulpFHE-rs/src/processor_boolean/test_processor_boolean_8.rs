@@ -3,7 +3,7 @@ use super::*; // Imports items from the parent module
 use rand::Rng;
 use serial_test::serial;
 
-fn encode(a: i32, size: u8) -> Vec<bool> {
+fn encode(a: i8, size: u8) -> Vec<bool> {
     // Convert to binary representation as a Vec<bool>
     let mut a_bits: Vec<bool> = Vec::new();
     for i in (0..size).rev() {
@@ -12,7 +12,7 @@ fn encode(a: i32, size: u8) -> Vec<bool> {
     a_bits
 }
 
-fn decode(bits: &[bool]) -> i32 {
+fn decode(bits: &[bool]) -> i8 {
     let mut result: u8 = 0;
 
     for &bit in bits {
@@ -22,7 +22,7 @@ fn decode(bits: &[bool]) -> i32 {
         }
     }
     // Interpret as signed
-    result as i32
+    result as i8
 }
 
 fn encrypt(bits: Vec<bool>, client_key: &ClientKey) -> Vec<Ciphertext> {
@@ -34,14 +34,14 @@ fn decrypt(ctxt: Vec<Ciphertext>, client_key: &ClientKey) -> Vec<bool> {
     let decrypted: Vec<_> = ctxt.iter().map(|bit| client_key.decrypt(bit)).collect();
     decrypted
 }
-// fn encode_encrypt(a: i32, size: u8, client_key: &ClientKey) -> Vec<Ciphertext> {
+// fn encode_encrypt(a: i8, size: u8, client_key: &ClientKey) -> Vec<Ciphertext> {
 //     let bits: Vec<bool> = encode(a, size);
 //     let mut enc_bits: Vec<Ciphertext> = encrypt(bits, client_key);
 //     enc_bits.reverse();
 //     enc_bits
 // }
 
-// fn encode_encrypt(value: i32, size: usize, ck: &ClientKey) -> Vec<Ciphertext> {
+// fn encode_encrypt(value: i8, size: usize, ck: &ClientKey) -> Vec<Ciphertext> {
 //     // Ensure size is at least 2 (1 for sign, at least 1 for magnitude)
 //     assert!(
 //         size >= 2,
@@ -62,7 +62,7 @@ fn decrypt(ctxt: Vec<Ciphertext>, client_key: &ClientKey) -> Vec<bool> {
 // }
 
 // Function to encrypt each bit of a signed integer (i64) using the Boolean API
-pub fn encode_encrypt(num: i32, size: usize, ck: &ClientKey) -> Vec<Ciphertext> {
+pub fn encode_encrypt(num: i8, size: usize, ck: &ClientKey) -> Vec<Ciphertext> {
     let mut ciphertexts = Vec::with_capacity(size);
     for i in 0..size {
         let bit = ((num >> i) & 1) != 0;
@@ -72,15 +72,15 @@ pub fn encode_encrypt(num: i32, size: usize, ck: &ClientKey) -> Vec<Ciphertext> 
 }
 
 // Function to decrypt the ciphertext vector and reconstruct the signed integer (i64)
-pub fn decrypt_decode(ciphertexts: &[Ciphertext], client_key: &ClientKey, ) -> i32 {
-    let mut bits: u32 = 0;
+pub fn decrypt_decode(ciphertexts: &[Ciphertext], client_key: &ClientKey, ) -> i8 {
+    let mut bits: u8 = 0;
     for (i, ct) in ciphertexts.iter().enumerate() {
         let bit = client_key.decrypt(ct);
         if bit {
-            bits |= 1u32 << i;
+            bits |= 1u8 << i;
         }
     }
-    i32::from_ne_bytes(bits.to_ne_bytes())
+    i8::from_ne_bytes(bits.to_ne_bytes())
 }
 
 //#[test]
@@ -91,8 +91,8 @@ fn test_encrypt_decrypt() {
     let server = ProcessorBoolean;
 
     // Define two numbers and convert them to signed 8-bit representation.
-    let a: i32 = 16;
-    let b: i32 = -10;
+    let a: i8 = 16;
+    let b: i8 = -10;
 
     let ct_a = encode_encrypt(a, 8, &client_key);
     let ct_b = encode_encrypt(b, 8, &client_key);
@@ -116,8 +116,8 @@ fn test_and() {
     let mut rng = rand::thread_rng();
 
     // Define two numbers and convert them to signed 8-bit representation.
-    let a: i32 = rng.gen_range(-50..50);
-    let b: i32 = rng.gen_range(-50..50);
+    let a: i8 = rng.gen_range(-50..50);
+    let b: i8 = rng.gen_range(-50..50);
 
     let ct_a = encode_encrypt(a, 8, &client_key);
     let ct_b = encode_encrypt(b, 8, &client_key);
@@ -142,8 +142,8 @@ fn test_or() {
     let mut rng = rand::thread_rng();
 
     // Define two numbers and convert them to signed 8-bit representation.
-    let a: i32 = rng.gen_range(-50..50);
-    let b: i32 = rng.gen_range(-50..50);
+    let a: i8 = rng.gen_range(-50..50);
+    let b: i8 = rng.gen_range(-50..50);
 
     let ct_a = encode_encrypt(a, 8, &client_key);
     let ct_b = encode_encrypt(b, 8, &client_key);
@@ -168,8 +168,8 @@ fn test_xor() {
     let mut rng = rand::thread_rng();
 
     // Define two numbers and convert them to signed 8-bit representation.
-    let a: i32 = rng.gen_range(-50..50);
-    let b: i32 = rng.gen_range(-50..50);
+    let a: i8 = rng.gen_range(-50..50);
+    let b: i8 = rng.gen_range(-50..50);
 
     let ct_a = encode_encrypt(a, 8, &client_key);
     let ct_b = encode_encrypt(b, 8, &client_key);
@@ -193,8 +193,8 @@ fn test_nand() {
     let mut rng = rand::thread_rng();
 
     // Define two numbers and convert them to signed 8-bit representation.
-    let a: i32 = rng.gen_range(-50..50);
-    let b: i32 = rng.gen_range(-50..50);
+    let a: i8 = rng.gen_range(-50..50);
+    let b: i8 = rng.gen_range(-50..50);
 
     let ct_a = encode_encrypt(a, 8, &client_key);
     let ct_b = encode_encrypt(b, 8, &client_key);
@@ -218,8 +218,8 @@ fn test_nor() {
     let mut rng = rand::thread_rng();
 
     // Define two numbers and convert them to signed 8-bit representation.
-    let a: i32 = rng.gen_range(-50..50);
-    let b: i32 = rng.gen_range(-50..50);
+    let a: i8 = rng.gen_range(-50..50);
+    let b: i8 = rng.gen_range(-50..50);
 
     let ct_a = encode_encrypt(a, 8, &client_key);
     let ct_b = encode_encrypt(b, 8, &client_key);
@@ -243,8 +243,8 @@ fn test_xnor() {
     let mut rng = rand::thread_rng();
 
     // Define two numbers and convert them to signed 8-bit representation.
-    let a: i32 = rng.gen_range(-50..50);
-    let b: i32 = rng.gen_range(-50..50);
+    let a: i8 = rng.gen_range(-50..50);
+    let b: i8 = rng.gen_range(-50..50);
 
     let ct_a = encode_encrypt(a, 8, &client_key);
     let ct_b = encode_encrypt(b, 8, &client_key);
@@ -268,7 +268,7 @@ fn test_not() {
     let mut rng = rand::thread_rng();
 
     // Define two numbers and convert them to signed 8-bit representation.
-    let a: i32 = rng.gen_range(-50..50);
+    let a: i8 = rng.gen_range(-50..50);
 
     let ct_a = encode_encrypt(a, 8, &client_key);
     let mut ct_result: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); ct_a.len()];
@@ -292,8 +292,8 @@ fn test_mux() {
     let mut rng = rand::thread_rng();
 
     // Define two numbers and convert them to signed 8-bit representation.
-    let a: i32 = rng.gen_range(-50..50);
-    let b: i32 = rng.gen_range(-50..50);
+    let a: i8 = rng.gen_range(-50..50);
+    let b: i8 = rng.gen_range(-50..50);
     let c: bool = true;
 
     let ct_a = encode_encrypt(a, 8, &client_key);
@@ -321,7 +321,7 @@ fn test_shl() {
     let mut rng = rand::thread_rng();
 
     // Define two numbers and convert them to signed 8-bit representation.
-    let a: i32 = rng.gen_range(-50..50);
+    let a: i8 = rng.gen_range(-50..50);
     let shift: usize = 2;
 
     let ct_a = encode_encrypt(a, 8, &client_key);
@@ -346,7 +346,7 @@ fn test_shr() {
     let mut rng = rand::thread_rng();
 
     // Define two numbers and convert them to signed 8-bit representation.
-    let a: i32 = rng.gen_range(-50..50);
+    let a: i8 = rng.gen_range(-50..50);
     let shift: usize = 2;
 
     let ct_a = encode_encrypt(a, 8, &client_key);
@@ -369,7 +369,7 @@ fn test_e_rotr() {
     let server = ProcessorBoolean;
 
     // Define number and shift amount
-    let a: i32 = 16;
+    let a: i8 = 16;
     let shift: usize = 2;
 
     let ct_a = encode_encrypt(a, 8, &client_key);
@@ -393,7 +393,7 @@ fn test_e_rotl() {
     let server = ProcessorBoolean;
 
     // Define number and shift amount
-    let a: i32 = 16;
+    let a: i8 = 16;
     let shift: usize = 2;
 
     let ct_a = encode_encrypt(a, 8, &client_key);
@@ -418,8 +418,8 @@ fn test_adder() {
     let mut rng = rand::thread_rng();
 
     // Define two numbers and convert them to signed 8-bit representation.
-    let a: i32 = rng.gen_range(0..100);
-    let b: i32 = rng.gen_range(0..100);
+    let a: i8 = rng.gen_range(0..100);
+    let b: i8 = rng.gen_range(0..100);
 
     let ct_a = encode_encrypt(a, 8, &client_key);
     let ct_b = encode_encrypt(b, 8, &client_key);
@@ -444,8 +444,8 @@ fn test_sign_adder() {
     let mut rng = rand::thread_rng();
 
     // Define two numbers and convert them to signed 8-bit representation.
-    let a: i32 = rng.gen_range(-50..50);
-    let b: i32 = rng.gen_range(-50..50);
+    let a: i8 = rng.gen_range(-50..50);
+    let b: i8 = rng.gen_range(-50..50);
 
     let ct_a = encode_encrypt(a, 8, &client_key);
     let ct_b = encode_encrypt(b, 8, &client_key);
@@ -470,8 +470,8 @@ fn test_subtracter() {
     let mut rng = rand::thread_rng();
 
     // Define two numbers and convert them to signed 8-bit representation.
-    let a: i32 = -17;//rng.gen_range(-50..50);
-    let b: i32 = -35;//rng.gen_range(-50..50);
+    let a: i8 = rng.gen_range(-50..50);
+    let b: i8 = rng.gen_range(-50..50);
 
     let ct_a = encode_encrypt(a, 8, &client_key);
     let ct_b = encode_encrypt(b, 8, &client_key);
@@ -500,8 +500,8 @@ fn test_multiplier() {
     let mut rng = rand::thread_rng();
 
     // Define two numbers and convert them to signed 8-bit representation.
-    let a: i32 = rng.gen_range(-10..10);
-    let b: i32 = rng.gen_range(-10..10);
+    let a: i8 = rng.gen_range(-10..10);
+    let b: i8 = rng.gen_range(-10..10);
 
     let ct_a = encode_encrypt(a, 8, &client_key);
     let ct_b = encode_encrypt(b, 8, &client_key);
@@ -525,8 +525,8 @@ fn test_div() {
     let mut rng = rand::thread_rng();
 
     // Define two numbers and convert them to signed 8-bit representation.
-    let a: i32 = rng.gen_range(-50..50);
-    let b: i32 = rng.gen_range(-50..50);
+    let a: i8 = rng.gen_range(-50..50);
+    let b: i8 = rng.gen_range(-50..50);
 
     let ct_a = encode_encrypt(a, 8, &client_key);
     let ct_b = encode_encrypt(b, 8, &client_key);
@@ -550,8 +550,8 @@ fn test_modulo() {
     let mut rng = rand::thread_rng();
 
     // Define two numbers and convert them to signed 8-bit representation.
-    let a: i32 = rng.gen_range(-50..50);
-    let b: i32 = rng.gen_range(-50..50);
+    let a: i8 = rng.gen_range(-50..50);
+    let b: i8 = rng.gen_range(-50..50);
 
     let ct_a = encode_encrypt(a, 8, &client_key);
     let ct_b = encode_encrypt(b, 8, &client_key);
@@ -575,7 +575,7 @@ fn test_max() {
     let server = ProcessorBoolean;
 
     // Define two numbers and convert them to signed 8-bit representation.
-    let a: [i32; 4] = [16, 10, 4, 0];
+    let a: [i8; 4] = [16, 10, 4, 0];
     let mut encrypted_values: Vec<Vec<Ciphertext>> = Vec::with_capacity(4);
     let mut ct_a: Vec<&[Ciphertext]> = Vec::with_capacity(4);
     for i in a.iter() {
@@ -606,7 +606,7 @@ fn test_min() {
     let server = ProcessorBoolean;
 
     // Define two numbers and convert them to signed 8-bit representation.
-    let a: [i32; 4] = [16, 10, -1, 0];
+    let a: [i8; 4] = [16, 10, -1, 0];
     let mut encrypted_values: Vec<Vec<Ciphertext>> = Vec::with_capacity(4);
     let mut ct_a: Vec<&[Ciphertext]> = Vec::with_capacity(4);
     for i in a.iter() {
@@ -637,7 +637,7 @@ fn test_relu() {
     let server = ProcessorBoolean;
 
     // Define the number for ReLU activation
-    let a: i32 = -10;
+    let a: i8 = -10;
 
     let ct_a = encode_encrypt(a, 8, &client_key);
     let mut ct_result: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); ct_a.len()];
@@ -659,7 +659,7 @@ fn test_sqrt() {
     let server = ProcessorBoolean;
 
     // Define the number for ReLU activation
-    let a: i32 = 100;
+    let a: i8 = 100;
 
     let ct_a = encode_encrypt(a, 8, &client_key);
     let mut ct_result: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); ct_a.len()];
@@ -681,7 +681,7 @@ fn test_mean() {
     let server = ProcessorBoolean;
 
     // Define two numbers and convert them to signed 8-bit representation.
-    let a: [i32; 4] = [16, 10, 4, 2];
+    let a: [i8; 4] = [16, 10, 4, 2];
     let mut encrypted_values: Vec<Vec<Ciphertext>> = Vec::with_capacity(4);
     let mut ct_a: Vec<&[Ciphertext]> = Vec::with_capacity(4);
     for i in a.iter() {
@@ -711,7 +711,7 @@ fn test_variance() {
     let server = ProcessorBoolean;
 
     // Define two numbers and convert them to signed 8-bit representation.
-    let a: [i32; 4] = [16, 10, 4, 2];
+    let a: [i8; 4] = [16, 10, 4, 2];
     let mut encrypted_values: Vec<Vec<Ciphertext>> = Vec::with_capacity(4);
     let mut ct_a: Vec<&[Ciphertext]> = Vec::with_capacity(4);
     for i in a.iter() {
@@ -741,7 +741,7 @@ fn test_standard_deviation() {
     let server = ProcessorBoolean;
 
     // Define two numbers and convert them to signed 8-bit representation.
-    let a: [i32; 4] = [16, 10, 4, 2];
+    let a: [i8; 4] = [16, 10, 4, 2];
     let mut encrypted_values: Vec<Vec<Ciphertext>> = Vec::with_capacity(4);
     let mut ct_a: Vec<&[Ciphertext]> = Vec::with_capacity(4);
     for i in a.iter() {
