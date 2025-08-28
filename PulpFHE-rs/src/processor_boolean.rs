@@ -1714,5 +1714,6 @@ impl Processor for ProcessorBoolean {
     fn pitch_trim_bit(&self, sk: &ServerKey, ctxt: &Ciphertext) -> Ciphertext {
         let mut fresh: Ciphertext = sk.bootstrap(ctxt);
         fresh
+
     }
 }
