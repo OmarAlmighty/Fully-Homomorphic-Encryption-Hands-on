@@ -355,6 +355,163 @@ impl ProcessorBoolean {
         }
         result
     }
+
+    fn ptxt_add_supplement(&self, a: &[bool], b: &[bool], size: usize, result: &mut [bool]) {
+        if size == 0 {
+            return;
+        }
+        let mut carry: Vec<bool> = vec![false; size + 1];
+        let mut temp: Vec<bool> = vec![false; size];
+        carry[0] = false;
+
+        self.ptxt_xor_range(a, b, &mut temp, 0, size);
+
+        for i in 0..size - 1 {
+            // Compute carry
+            carry[i + 1] = if temp[i] { carry[i] } else { a[i] };
+        }
+
+        // Compute sum
+        self.ptxt_xor_range(&carry, &temp, result, 0, size);
+    }
+
+    fn ptxt_multiplier(&self, a: &[bool], b: &[bool], result: &mut [bool]) {
+        let size: usize = a.len();
+        let mut tmp_array: Vec<bool> = vec![false; size];
+        let mut sum: Vec<bool> = vec![false; size];
+        let mut temp_sum: Vec<bool> = vec![false; size];
+        for i in 0..size {
+            for j in 0..size - i {
+                tmp_array[j] = self.ptxt_and_bit(a[i], b[j]);
+            }
+            self.ptxt_add_supplement(&tmp_array, &sum[i..], size - i, &mut temp_sum[i..]);
+            sum.clone_from_slice(&temp_sum);
+        }
+        result.clone_from_slice(&sum);
+    }
+
+    /// ## Full Adder
+    /// Computes the sum of three encrypted bits (a, b, carry_in)
+    /// and returns the sum bit and the carry_out bit.
+    fn full_adder(
+        &self,
+        sk: &ServerKey,
+        a: &Ciphertext,
+        b: &Ciphertext,
+        carry_in: &Ciphertext,
+    ) -> (Ciphertext, Ciphertext) {
+        let xor_a_b = self.pitch_trim_bit(sk, &sk.xor(a, b));
+        let sum = self.pitch_trim_bit(sk, &sk.xor(&xor_a_b, carry_in));
+
+        let and_a_b = self.pitch_trim_bit(sk, &sk.and(a, b));
+        let and_carry_xor = self.pitch_trim_bit(sk, &sk.and(carry_in, &xor_a_b));
+        let carry_out = self.pitch_trim_bit(sk, &sk.or(&and_a_b, &and_carry_xor));
+
+        (sum, carry_out)
+    }
+
+    /// ## 16-bit Ripple-Carry Adder
+    /// Adds two 16-bit ciphertext vectors (`b` into `acc`).
+    fn add_vec(&self, sk: &ServerKey, acc: &mut [Ciphertext], b: &[Ciphertext]) {
+        assert_eq!(
+            acc.len(),
+            b.len(),
+            "Vectors for addition must have the same length."
+        );
+        let mut carry = Ciphertext::Trivial(false); // Initial carry is 0
+        for i in 0..acc.len() {
+            // Clone acc[i] to satisfy the borrow checker
+            let (sum, new_carry) = self.full_adder(sk, &acc[i].clone(), &b[i], &carry);
+            acc[i] = sum;
+            carry = new_carry;
+        }
+    }
+
+    /// ## 16-bit Ripple-Carry Subtractor
+    /// Subtracts a 16-bit ciphertext vector from another (`acc -= b`).
+    /// Implemented as `acc + NOT(b) + 1`.
+    fn sub_vec(&self, sk: &ServerKey, acc: &mut [Ciphertext], b: &[Ciphertext]) {
+        assert_eq!(
+            acc.len(),
+            b.len(),
+            "Vectors for subtraction must have the same length."
+        );
+        let b_not: Vec<Ciphertext> = b.iter().map(|bit| sk.not(bit)).collect();
+        let mut carry = Ciphertext::Trivial(true); // Initial carry is 1 for 2's complement
+        for i in 0..acc.len() {
+            let (sum, new_carry) = self.full_adder(sk, &acc[i].clone(), &b_not[i], &carry);
+            acc[i] = sum;
+            carry = new_carry;
+        }
+    }
+
+    /// ## 8x8 Signed Multiplier
+    ///
+    /// Multiplies two 8-bit signed integers `a` and `b`, encrypted bit-by-bit.
+    /// The input vectors are expected to be in little-endian format (LSB at index 0).
+    /// The 16-bit result is stored in the `result` slice.
+    fn new_multiplier(
+        &self,
+        sk: &ServerKey,
+        a: &[Ciphertext],
+        b: &[Ciphertext],
+        result: &mut [Ciphertext],
+    ) {
+        const INPUT_BITS: usize = 8;
+        const OUTPUT_BITS: usize = 16;
+
+        assert_eq!(a.len(), INPUT_BITS, "Input 'a' must be 8 bits.");
+        assert_eq!(b.len(), INPUT_BITS, "Input 'b' must be 8 bits.");
+        assert_eq!(result.len(), OUTPUT_BITS, "Result buffer must be 16 bits.");
+
+        // 1. Initialize result to all zeros
+        for bit in result.iter_mut() {
+            *bit = Ciphertext::Trivial(false);
+        }
+
+        let mut term = vec![Ciphertext::Trivial(false); OUTPUT_BITS];
+
+        // 2. Add the first 7 (INPUT_BITS - 1) partial products
+        for i in 0..(INPUT_BITS - 1) {
+            // Reset the temporary term vector to zero
+            term.iter_mut()
+                .for_each(|bit| *bit = Ciphertext::Trivial(false));
+
+            // Calculate the partial product (a * b_i) and place it at the shifted position
+            for j in 0..INPUT_BITS {
+                term[j + i] = self.pitch_trim_bit(sk, &sk.and(&a[j], &b[i]));
+            }
+
+            // Sign-extend this partial product to 16 bits
+            let sign_bit = self.pitch_trim_bit(sk, &sk.and(&a[INPUT_BITS - 1], &b[i]));
+            for k in (INPUT_BITS + i)..OUTPUT_BITS {
+                term[k] = sign_bit.clone();
+            }
+
+            // Add the sign-extended and shifted term to the result
+            self.add_vec(sk, result, &term);
+        }
+
+        // 3. Subtract the last partial product (for the sign bit b_7)
+        term.iter_mut()
+            .for_each(|bit| *bit = Ciphertext::Trivial(false));
+
+        let i = INPUT_BITS - 1; // i = 7
+
+        // Calculate the partial product (a * b_7) and place it at the shifted position
+        for j in 0..INPUT_BITS {
+            term[j + i] = self.pitch_trim_bit(sk, &sk.and(&a[j], &b[i]));
+        }
+
+        // Sign-extend the last partial product
+        let sign_bit = self.pitch_trim_bit(sk, &sk.and(&a[INPUT_BITS - 1], &b[i]));
+        for k in (INPUT_BITS + i)..OUTPUT_BITS {
+            term[k] = sign_bit.clone();
+        }
+
+        // Subtract the final term from the result
+        self.sub_vec(sk, result, &term);
+    }
 }
 impl Processor for ProcessorBoolean {
     fn e_and(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]) {
@@ -1002,14 +1159,13 @@ impl Processor for ProcessorBoolean {
         a: &[Ciphertext],
         b: &[Ciphertext],
         select: u8,
-        result: &mut [Ciphertext],
-    ) {
+    ) -> Ciphertext {
         let size: usize = a.len();
 
-        let mut not_a: Vec<Ciphertext> = Vec::new();
+        let mut not_a: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
         self.e_not(sk, a, &mut not_a);
 
-        let mut not_b: Vec<Ciphertext> = Vec::new();
+        let mut not_b: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
         self.e_not(sk, b, &mut not_b);
 
         let mut temp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); 10];
@@ -1038,30 +1194,29 @@ impl Processor for ProcessorBoolean {
             equal = self.e_nor_bit(sk, &greater_than, &less_than);
         }
 
+        let mut result: Ciphertext = Ciphertext::Trivial(false);
         // select desired output
         if select == 0 {
             // ecmpeq
-            result[0].clone_from(&equal);
+            result.clone_from(&equal);
         } else if select == 1 {
             // ecmpl
-            result[0].clone_from(&less_than);
+            result.clone_from(&less_than);
         } else if select == 2 {
             // ecmpg
-            result[0].clone_from(&greater_than);
+            result.clone_from(&greater_than);
         } else if select == 3 {
             // ecmpgeq
-            result[0] = self.e_or_bit(sk, &equal, &greater_than);
+            result = self.e_or_bit(sk, &equal, &greater_than);
         } else if select == 4 {
             // ecmpleq
-            result[0] = self.e_or_bit(sk, &equal, &less_than);
+            result = self.e_or_bit(sk, &equal, &less_than);
         } else if select == 5 {
             // ecmpneq
-            result[0] = self.e_not_bit(sk, &equal);
+            result = self.e_not_bit(sk, &equal);
         }
 
-        for i in 1..size {
-            result[i] = sk.trivial_encrypt(false);
-        }
+        result
     }
 
     fn compare_bit(
@@ -1273,7 +1428,7 @@ impl Processor for ProcessorBoolean {
         let mut temp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
         carry[0] = sk.trivial_encrypt(false);
 
-        self.e_xor(sk, a, b, &mut temp);
+        self.e_xor_range(sk, a, b, &mut temp, 0, size);
 
         for i in 0..size - 1 {
             // Compute carry
@@ -1295,13 +1450,15 @@ impl Processor for ProcessorBoolean {
         let mut tmp_array: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
         let mut sum: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
         let mut temp_sum: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        let mut a = a.to_vec();
+        let mut b = b.to_vec();
+
         for i in 0..size {
             for j in 0..size - 1 {
                 tmp_array[j] = self.e_and_bit(sk, &a[i], &b[j]);
             }
-            temp_sum.clone_from(&sum);
             self.add_supplement(sk, &mut tmp_array, &sum[i..], size - i, &mut temp_sum[i..]);
-            sum.clone_from(&temp_sum);
+            self.copy_to_from(&mut sum, &temp_sum);
         }
 
         self.copy_to_from(result, &sum);
@@ -1385,6 +1542,7 @@ impl Processor for ProcessorBoolean {
     }
 
     fn max(&self, sk: &ServerKey, a: &Vec<&[Ciphertext]>, result: &mut [Ciphertext]) {
+        //does not handle negative numbers
         let size = a[0].len();
         let mut max: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
         let mut selector: Ciphertext = sk.trivial_encrypt(false);
@@ -1392,10 +1550,8 @@ impl Processor for ProcessorBoolean {
 
         self.copy_to_from(&mut max, &a[0]);
 
-        for indx in 0..size {
-            for (x, y) in current.iter_mut().zip(a[indx].iter()) {
-                x.clone_from(y);
-            }
+        for indx in 0..a.len() {
+            self.copy_to_from(&mut current, &a[indx]);
 
             // tmps[0] is the result of the comparison: 0 if a is larger, 1 if b is larger
             // select the max and copy it to the result
@@ -1419,7 +1575,7 @@ impl Processor for ProcessorBoolean {
         self.copy_to_from(&mut min, a[0]);
 
         for indx in 0..size {
-            current.clone_from(&a[indx].to_vec());
+            self.copy_to_from(&mut current, &a[indx]);
 
             // tmps[0] is the result of the comparison: 0 if a is larger, 1 if b is larger
             // select the max and copy it to the result
@@ -1729,6 +1885,5 @@ impl Processor for ProcessorBoolean {
     fn pitch_trim_bit(&self, sk: &ServerKey, ctxt: &Ciphertext) -> Ciphertext {
         let mut fresh: Ciphertext = sk.bootstrap(ctxt);
         fresh
-
     }
 }

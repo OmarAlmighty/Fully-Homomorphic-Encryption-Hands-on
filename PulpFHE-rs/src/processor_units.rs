@@ -241,8 +241,7 @@ pub trait Processor {
         a: &[Ciphertext],
         b: &[Ciphertext],
         select: u8,
-        result: &mut [Ciphertext],
-    );
+    ) -> Ciphertext;
 
     fn compare_bit(
         &self,

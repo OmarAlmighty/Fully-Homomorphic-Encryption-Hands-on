@@ -3,26 +3,25 @@ use super::*; // Imports items from the parent module
 use rand::Rng;
 use serial_test::serial;
 
-fn encode(a: i8, size: u8) -> Vec<bool> {
+fn encode(a: i8, size: usize) -> Vec<bool> {
     // Convert to binary representation as a Vec<bool>
-    let mut a_bits: Vec<bool> = Vec::new();
-    for i in (0..size).rev() {
-        a_bits.push((a & (1 << i)) != 0);
+    let mut bits = Vec::with_capacity(size);
+    for i in 0..size {
+        let bit = ((a >> i) & 1) != 0;
+        bits.push(bit);
     }
-    a_bits
+    println!("");
+    bits
 }
 
 fn decode(bits: &[bool]) -> i8 {
-    let mut result: u8 = 0;
-
-    for &bit in bits {
-        result <<= 1;
+    let mut res: u8 = 0;
+    for (i, &bit) in bits.iter().enumerate() {
         if bit {
-            result |= 1;
+            res |= 1u8 << i;
         }
     }
-    // Interpret as signed
-    result as i8
+    i8::from_ne_bytes(res.to_ne_bytes())
 }
 
 fn encrypt(bits: Vec<bool>, client_key: &ClientKey) -> Vec<Ciphertext> {
@@ -34,37 +33,10 @@ fn decrypt(ctxt: Vec<Ciphertext>, client_key: &ClientKey) -> Vec<bool> {
     let decrypted: Vec<_> = ctxt.iter().map(|bit| client_key.decrypt(bit)).collect();
     decrypted
 }
-// fn encode_encrypt(a: i8, size: u8, client_key: &ClientKey) -> Vec<Ciphertext> {
-//     let bits: Vec<bool> = encode(a, size);
-//     let mut enc_bits: Vec<Ciphertext> = encrypt(bits, client_key);
-//     enc_bits.reverse();
-//     enc_bits
-// }
-
-// fn encode_encrypt(value: i8, size: usize, ck: &ClientKey) -> Vec<Ciphertext> {
-//     // Ensure size is at least 2 (1 for sign, at least 1 for magnitude)
-//     assert!(
-//         size >= 2,
-//         "Size must be at least 2 for sign-magnitude representation"
-//     );
-//     let mut binary_string = format!("{:08b}", value);
-//     let binary_string: String = binary_string
-//         .chars()
-//         .rev() // Reverse the iterator to get characters from the end
-//         .take(size) // Take the last 'n' characters
-//         .collect::<String>() // Collect them into a new String
-//         .chars() // Convert back to char iterator to reverse again
-//         .rev() // Reverse to get the correct order
-//         .collect(); // Collect into the final String
-//     let binary = binary_string.chars().map(|c| c == '1').collect();
-//     println!("{:?}", binary);
-//     encrypt(binary, ck)
-// }
 
 // Function to encrypt each bit of a signed integer (i64) using the Boolean API
 pub fn encode_encrypt(num: i8, size: usize, ck: &ClientKey) -> Vec<Ciphertext> {
     // Binary encoding is LSB...MSB
-
     let mut ciphertexts = Vec::with_capacity(size);
     for i in 0..size {
         let bit = ((num >> i) & 1) != 0;
@@ -87,6 +59,19 @@ pub fn decrypt_decode(ciphertexts: &[Ciphertext], client_key: &ClientKey, ) -> i
     }
     println!("");
     i8::from_ne_bytes(bits.to_ne_bytes())
+}
+
+pub fn new_decrypt_decode(ciphertexts: &[Ciphertext], client_key: &ClientKey, ) -> i16 {
+    let mut bits: u16 = 0;
+    for (i, ct) in ciphertexts.iter().enumerate() {
+        let bit = client_key.decrypt(ct);
+        print!("{}", bit as u8);
+        if bit {
+            bits |= 1u16 << i;
+        }
+    }
+    println!("");
+    i16::from_ne_bytes(bits.to_ne_bytes())
 }
 
 #[test]
@@ -511,16 +496,56 @@ fn test_multiplier() {
     // Define two numbers and convert them to signed 8-bit representation.
     let a: i8 = rng.gen_range(-10..10);
     let b: i8 = rng.gen_range(-10..10);
+    let enc_a = encode(a, 8);
+    let enc_b = encode(b, 8);
+    let mut res: Vec<bool> = vec![false; 8];
 
     let ct_a = encode_encrypt(a, 8, &client_key);
     let ct_b = encode_encrypt(b, 8, &client_key);
     let mut ct_result: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); ct_a.len()];
+
+    server.ptxt_multiplier(&enc_a, &enc_b, &mut res);
+    println!("{a} * {b} = {}", decode(&res));
+    println!("{:?} * {:?} = {:?}", enc_a, enc_b, res);
 
     server.multiplier(&server_key, &ct_a, &ct_b, &mut ct_result);
 
     let dec_res = decrypt_decode(&ct_result, &client_key);
     println!("\t {} {} {} = {}", a, b, fn_name, dec_res);
     assert_eq!(dec_res, a.wrapping_mul(b));
+    println!("[✓] PASS: {fn_name}\n");
+}
+
+#[test]
+#[serial]
+fn test_newmultiplier() {
+    let fn_name = "multiplier";
+    println!("[*] TEST: {fn_name}");
+    let (client_key, server_key) = gen_keys();
+
+    let server = ProcessorBoolean;
+    let mut rng = rand::thread_rng();
+
+    // Define two numbers and convert them to signed 8-bit representation.
+    let a: i8 = -3;//rng.gen_range(-10..10);
+    let b: i8 = 7;//rng.gen_range(-10..10);
+    let enc_a = encode(a, 8);
+    let enc_b = encode(b, 8);
+    let mut res: Vec<bool> = vec![false; 8];
+
+    let ct_a = encode_encrypt(a, 8, &client_key);
+    let ct_b = encode_encrypt(b, 8, &client_key);
+    let mut ct_result: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); 16];
+
+    server.ptxt_multiplier(&enc_a, &enc_b, &mut res);
+    println!("{a} * {b} = {}", decode(&res));
+    println!("{:?} * {:?} = {:?}", enc_a, enc_b, res);
+
+    server.new_multiplier(&server_key, &ct_a, &ct_b, &mut ct_result);
+
+    let dec_res = new_decrypt_decode(&ct_result, &client_key);
+    println!("\t {} {} {} = {}", a, b, fn_name, dec_res);
+    assert_eq!(dec_res, a.wrapping_mul(b) as i16);
     println!("[✓] PASS: {fn_name}\n");
 }
 #[test]
@@ -646,7 +671,7 @@ fn test_relu() {
     let server = ProcessorBoolean;
 
     // Define the number for ReLU activation
-    let a: i8 = -10;
+    let a: i8 = 10;
 
     let ct_a = encode_encrypt(a, 8, &client_key);
     let mut ct_result: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); ct_a.len()];
