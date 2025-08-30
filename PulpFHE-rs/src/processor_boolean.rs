@@ -1426,16 +1426,18 @@ impl Processor for ProcessorBoolean {
         }
         let mut carry: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size + 1];
         let mut temp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
-        carry[0] = sk.trivial_encrypt(false);
 
         self.e_xor_range(sk, a, b, &mut temp, 0, size);
+        let mut a_and_b: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        let mut tmp_c = sk.trivial_encrypt(false);
+        self.e_and_range(sk, &a, &b, &mut a_and_b, 0, size);
 
-        for i in 0..size - 1 {
+        for i in 0..size {
+            tmp_c = self.e_and_bit(sk, &temp[i], &carry[i]);
             // Compute carry
-            carry[i + 1] = self.e_mux_bit(sk, &temp[i], &carry[i], &a[i]);
+            carry[i + 1] = self.e_or_bit(sk, &a_and_b[i], &tmp_c)
         }
 
-        // Compute sum
         self.e_xor_range(sk, &carry, &temp, result, 0, size);
     }
 
@@ -1450,11 +1452,8 @@ impl Processor for ProcessorBoolean {
         let mut tmp_array: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
         let mut sum: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
         let mut temp_sum: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
-        let mut a = a.to_vec();
-        let mut b = b.to_vec();
-
         for i in 0..size {
-            for j in 0..size - 1 {
+            for j in 0..size - i {
                 tmp_array[j] = self.e_and_bit(sk, &a[i], &b[j]);
             }
             self.add_supplement(sk, &mut tmp_array, &sum[i..], size - i, &mut temp_sum[i..]);
@@ -1574,7 +1573,7 @@ impl Processor for ProcessorBoolean {
 
         self.copy_to_from(&mut min, a[0]);
 
-        for indx in 0..size {
+        for indx in 0..a.len() {
             self.copy_to_from(&mut current, &a[indx]);
 
             // tmps[0] is the result of the comparison: 0 if a is larger, 1 if b is larger
@@ -1593,20 +1592,9 @@ impl Processor for ProcessorBoolean {
 
     fn relu(&self, sk: &ServerKey, a: &[Ciphertext], result: &mut [Ciphertext]) {
         let size = a.len();
-        let mut p2: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
-        let mut p3: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
-
-        p2[size - 1] = self.e_not_bit(sk, &a[size - 1]);
-
-        for i in 0..size - 1 {
-            p2[i] = sk.trivial_encrypt(false);
-        }
-
-        for i in 0..size {
-            p3[i] = p2[size - i - 1].clone();
-        }
-
-        self.multiplier(sk, &p3, &a, result);
+        let sign = &a[size - 1];
+        let zero = vec![Ciphertext::Trivial(false); size];
+        self.e_mux(sk, &sign, &zero, &a, result);
     }
 
     fn divider(
