@@ -14,3 +14,4 @@ No-boots/.DS_Store
 /PulpFHE-rs/target
 PulpFHE-rs/Cargo.lock
 PulpFHE-rs/Cargo.lock
+/FHE_Circuit_Debugger/.idea
