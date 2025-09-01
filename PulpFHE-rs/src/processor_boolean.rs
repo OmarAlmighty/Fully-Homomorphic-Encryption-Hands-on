@@ -24,15 +24,9 @@ pub struct ProcessorBoolean;
 
 impl ProcessorBoolean {
     /// A helper function for performing division and modulo operations.
-    fn e_shl_p(
-        &self,
-        sk: &ServerKey,
-        a: &[Ciphertext],
-        LSB: &Ciphertext,
-        result: &mut [Ciphertext],
-    ) {
+    fn e_shl_p(&self, a: &[Ciphertext], LSB: &Ciphertext, result: &mut [Ciphertext]) {
         for i in 1..a.len() {
-            result[i] = a[i].clone()
+            result[i] = a[i - 1].clone()
         }
         result[0] = LSB.clone();
     }
@@ -644,6 +638,7 @@ impl Processor for ProcessorBoolean {
     fn e_xor(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]) {
         let size: usize = a.len();
         for i in 0..size {
+            result[i] = self.pitch_trim_bit(sk, &sk.xor(&a[i], &b[i]));
             result[i] = self.pitch_trim_bit(sk, &sk.xor(&a[i], &b[i]));
         }
 
@@ -1265,24 +1260,48 @@ impl Processor for ProcessorBoolean {
             }
         }
     }
-
+    //
+    // fn adder(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]) {
+    //     let size: usize = a.len();
+    //
+    //     let mut carry: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size + 1];
+    //     let mut temp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+    //
+    //     self.e_xor(sk, &a, &b, &mut temp);
+    //
+    //     for i in 0..size {
+    //         result[i] = self.e_xor_bit(sk, &carry[i], &temp[i]);
+    //         if i != size - 1 {
+    //             carry[i + 1] = self.e_mux_bit(sk, &temp[i], &carry[i], &a[i]);
+    //         }
+    //     }
+    // }
     fn adder(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]) {
-        let size: usize = a.len();
+        // Validate input lengths
+        let size = a.len();
 
-        let mut carry: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size + 1];
+        // Initialize temporary vectors
+        let mut carry: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size + 1]; // Includes carry-out
         let mut temp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        let mut a_and_b: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
 
-        //initialize the first carry to 0
-        carry[0] = sk.trivial_encrypt(false);
-
-        self.e_xor(sk, &a, &b, &mut temp);
-
+        // Compute a XOR b for all bits
+        self.e_xor(sk, a, b, &mut temp);
+        self.e_and(sk, a, b, &mut a_and_b);
+        // Ripple-carry adder logic
         for i in 0..size {
+            // Sum bit: result[i] = a[i] XOR b[i] XOR carry[i]
             result[i] = self.e_xor_bit(sk, &carry[i], &temp[i]);
-            carry[i + 1] = self.e_mux_bit(sk, &temp[i], &carry[i], &a[i]);
+
+            if i != size - 1 {
+                // Carry bit: carry[i+1] = (a[i] AND b[i]) OR (a[i] AND carry[i]) OR (b[i] AND carry[i])
+                let a_and_carry = self.e_and_bit(sk, &a[i], &carry[i]);
+                let b_and_carry = self.e_and_bit(sk, &b[i], &carry[i]);
+                let temp_carry = self.e_or_bit(sk, &a_and_b[i], &a_and_carry);
+                carry[i + 1] = self.e_or_bit(sk, &temp_carry, &b_and_carry);
+            }
         }
     }
-
     fn sign_adder(
         &self,
         sk: &ServerKey,
@@ -1611,8 +1630,9 @@ impl Processor for ProcessorBoolean {
         let mut A: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
         // M is the divisor, copy the bits from b to M
         let mut M: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
-        let mut MSB: Ciphertext;
-        let mut zero: Ciphertext = sk.trivial_encrypt(false);
+
+        let mut MSB: Ciphertext = sk.trivial_encrypt(false);
+        let zero: Ciphertext = sk.trivial_encrypt(false);
         let mut A_msb: Ciphertext = sk.trivial_encrypt(false);
         let mut not_A_msb: Ciphertext = sk.trivial_encrypt(false);
         let mut A_tmp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
@@ -1624,7 +1644,7 @@ impl Processor for ProcessorBoolean {
 
         for i in 0..size {
             // Left shift Q, and replace the LSB with 0
-            self.e_shl_p(sk, &Q, &zero, &mut Q_tmp);
+            self.e_shl_p(&Q, &zero, &mut Q_tmp);
 
             // Store the MSB
             MSB = Q[size - 1].clone();
@@ -1632,27 +1652,28 @@ impl Processor for ProcessorBoolean {
             // Update Q after shifting
             self.copy_to_from(&mut Q, &Q_tmp);
 
-            // Left shift A and replace the LSB with MSB from the previous step
-            self.e_shl_p(sk, &A, &MSB, &mut A_tmp);
+            if i != size - 1 {
+                // Left shift A and replace the LSB with MSB from the previous step
+                self.e_shl_p(&A, &MSB, &mut A_tmp);
 
-            // Compute A = A-M
-            self.subtracter(sk, &A_tmp, &M, &mut A);
+                // Compute A = A-M
+                self.subtracter(sk, &A_tmp, &M, &mut A);
 
-            // Get the MSB of A
-            A_msb = A[size - 1].clone();
+                // Get the MSB of A
+                A_msb = A[size - 1].clone();
 
-            // Compute Not(MSB of A)
-            not_A_msb = self.e_not_bit(sk, &A_msb);
+                // Compute Not(MSB of A)
+                not_A_msb = self.e_not_bit(sk, &A_msb);
 
-            // Replace the LSB of Q with NOT(MSB of A)
-            Q[0] = not_A_msb.clone();
+                // Replace the LSB of Q with NOT(MSB of A)
+                Q[0] = not_A_msb.clone();
 
-            // Compute A = A + M
-            self.adder(sk, &A, &M, &mut A_m);
+                // Compute A = A + M
+                self.adder(sk, &A, &M, &mut A_m);
 
-            // If (A[0] == 1), A = A + M. Else, A is not changed.
-            for i in 0..size {
-                A[i] = self.e_mux_bit(sk, &A_msb, &A_m[i], &A[i]);
+                // If MSB of A is 1, use A + M result, else keep A unchanged
+                self.e_mux(sk, &A_msb, &A_m, &A, &mut A_tmp);
+                self.copy_to_from(&mut A, &A_tmp);
             }
         }
 
@@ -1673,8 +1694,9 @@ impl Processor for ProcessorBoolean {
         let mut A: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
         // M is the divisor, copy the bits from b to M
         let mut M: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
-        let mut MSB: Ciphertext;
-        let mut zero: Ciphertext = sk.trivial_encrypt(false);
+
+        let mut MSB: Ciphertext = sk.trivial_encrypt(false);
+        let zero: Ciphertext = sk.trivial_encrypt(false);
         let mut A_msb: Ciphertext = sk.trivial_encrypt(false);
         let mut not_A_msb: Ciphertext = sk.trivial_encrypt(false);
         let mut A_tmp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
@@ -1686,7 +1708,7 @@ impl Processor for ProcessorBoolean {
 
         for i in 0..size {
             // Left shift Q, and replace the LSB with 0
-            self.e_shl_p(sk, &Q, &zero, &mut Q_tmp);
+            self.e_shl_p(&Q, &zero, &mut Q_tmp);
 
             // Store the MSB
             MSB = Q[size - 1].clone();
@@ -1695,7 +1717,7 @@ impl Processor for ProcessorBoolean {
             self.copy_to_from(&mut Q, &Q_tmp);
 
             // Left shift A and replace the LSB with MSB from the previous step
-            self.e_shl_p(sk, &A, &MSB, &mut A_tmp);
+            self.e_shl_p(&A, &MSB, &mut A_tmp);
 
             // Compute A = A-M
             self.subtracter(sk, &A_tmp, &M, &mut A);
@@ -1712,10 +1734,9 @@ impl Processor for ProcessorBoolean {
             // Compute A = A + M
             self.adder(sk, &A, &M, &mut A_m);
 
-            // If (A[0] == 1), A = A + M. Else, A is not changed.
-            for i in 0..size {
-                A[i] = self.e_mux_bit(sk, &A_msb, &A_m[i], &A[i]);
-            }
+            // If MSB of A is 1, use A + M result, else keep A unchanged
+            self.e_mux(sk, &A_msb, &A_m, &A, &mut A_tmp);
+            self.copy_to_from(&mut A, &A_tmp);
         }
 
         self.copy_to_from(result, &A);
