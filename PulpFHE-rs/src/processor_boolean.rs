@@ -1854,8 +1854,9 @@ impl Processor for ProcessorBoolean {
 
         // Trivially encrypt the bits of count
         let mut bits: Vec<bool> = Vec::new();
-        for i in (0..a[0].len()).rev() {
-            bits.push((count & (1 << i)) != 0);
+        for i in (0..a[0].len()) {
+            let bit = ((count >> i) & 1) != 0;
+            bits.push(bit);
         }
         let c_count: Vec<_> = bits.iter().map(|&bit| sk.trivial_encrypt(bit)).collect();
 
@@ -1950,8 +1951,9 @@ impl Processor for ProcessorBoolean {
 
         // Trivially encrypt the bits of count
         let mut bits: Vec<bool> = Vec::new();
-        for i in (0..a[0].len()).rev() {
-            bits.push((count & (1 << i)) != 0);
+        for i in (0..a[0].len()) {
+            let bit = ((count >> i) & 1) != 0;
+            bits.push(bit);
         }
         let c_count: Vec<_> = bits.iter().map(|&bit| sk.trivial_encrypt(bit)).collect();
         self.divider(sk, &sum, &c_count, result);
