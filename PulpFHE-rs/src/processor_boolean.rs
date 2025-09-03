@@ -515,19 +515,19 @@ impl Processor for ProcessorBoolean {
             result[i] = self.pitch_trim_bit(sk, &sk.and(&a[i], &b[i]));
         }
 
-        #[cfg(debug_assertions)]
-        {
-            println!("DEBUG: `e_and` -> len(a)={}, len(b)={}", size, b.len());
-        }
+        // #[cfg(debug_assertions)]
+        // {
+        //     println!("DEBUG: `e_and` -> len(a)={}, len(b)={}", size, b.len());
+        // }
     }
 
     fn e_and_bit(&self, sk: &ServerKey, a: &Ciphertext, b: &Ciphertext) -> Ciphertext {
         let result: Ciphertext = self.pitch_trim_bit(sk, &sk.and(a, b));
 
-        #[cfg(debug_assertions)]
-        {
-            println!("DEBUG: `e_and_bit`");
-        }
+        // #[cfg(debug_assertions)]
+        // {
+        //     println!("DEBUG: `e_and_bit`");
+        // }
         result
     }
 
@@ -551,16 +551,16 @@ impl Processor for ProcessorBoolean {
             result[i] = self.pitch_trim_bit(sk, &sk.and(&a[i], &b[i]));
         }
 
-        #[cfg(debug_assertions)]
-        {
-            println!(
-                "DEBUG: `e_and_range` -> len(a)={}, len(b)={}, index_low={}, index_high={}",
-                a.len(),
-                b.len(),
-                index_low,
-                index_high
-            );
-        }
+        // #[cfg(debug_assertions)]
+        // {
+        //     println!(
+        //         "DEBUG: `e_and_range` -> len(a)={}, len(b)={}, index_low={}, index_high={}",
+        //         a.len(),
+        //         b.len(),
+        //         index_low,
+        //         index_high
+        //     );
+        // }
     }
 
     /// Compute the encrypted OR gate on the `Ciphertext` vectors `a` and `b`. The result is stored in
@@ -578,19 +578,19 @@ impl Processor for ProcessorBoolean {
             result[i] = self.pitch_trim_bit(sk, &sk.or(&a[i], &b[i]));
         }
 
-        #[cfg(debug_assertions)]
-        {
-            println!("DEBUG: `e_or` -> len(a)={}, len(b)={}", size, b.len());
-        }
+        // #[cfg(debug_assertions)]
+        // {
+        //     println!("DEBUG: `e_or` -> len(a)={}, len(b)={}", size, b.len());
+        // }
     }
 
     fn e_or_bit(&self, sk: &ServerKey, a: &Ciphertext, b: &Ciphertext) -> Ciphertext {
         let result: Ciphertext = self.pitch_trim_bit(sk, &sk.or(a, b));
 
-        #[cfg(debug_assertions)]
-        {
-            println!("DEBUG: `e_or_bit`");
-        }
+        // #[cfg(debug_assertions)]
+        // {
+        //     println!("DEBUG: `e_or_bit`");
+        // }
         result
     }
 
@@ -614,16 +614,16 @@ impl Processor for ProcessorBoolean {
             result[i] = self.pitch_trim_bit(sk, &sk.or(&a[i], &b[i]));
         }
 
-        #[cfg(debug_assertions)]
-        {
-            println!(
-                "DEBUG: `e_or_range` -> len(a)={}, len(b)={}, index_low={}, index_high={}",
-                a.len(),
-                b.len(),
-                index_low,
-                index_high
-            );
-        }
+        // #[cfg(debug_assertions)]
+        // {
+        //     println!(
+        //         "DEBUG: `e_or_range` -> len(a)={}, len(b)={}, index_low={}, index_high={}",
+        //         a.len(),
+        //         b.len(),
+        //         index_low,
+        //         index_high
+        //     );
+        // }
     }
 
     /// Compute the encrypted XOR gate on the `Ciphertext` vectors `a` and `b`. The result is stored in
@@ -642,19 +642,19 @@ impl Processor for ProcessorBoolean {
             result[i] = self.pitch_trim_bit(sk, &sk.xor(&a[i], &b[i]));
         }
 
-        #[cfg(debug_assertions)]
-        {
-            println!("DEBUG: `e_xor` -> len(a)={}, len(b)={}", size, b.len());
-        }
+        // #[cfg(debug_assertions)]
+        // {
+        //     println!("DEBUG: `e_xor` -> len(a)={}, len(b)={}", size, b.len());
+        // }
     }
 
     fn e_xor_bit(&self, sk: &ServerKey, a: &Ciphertext, b: &Ciphertext) -> Ciphertext {
         let result: Ciphertext = self.pitch_trim_bit(sk, &sk.xor(a, b));
 
-        #[cfg(debug_assertions)]
-        {
-            println!("DEBUG: `e_xor_bit`");
-        }
+        // #[cfg(debug_assertions)]
+        // {
+        //     println!("DEBUG: `e_xor_bit`");
+        // }
         result
     }
 
@@ -678,16 +678,16 @@ impl Processor for ProcessorBoolean {
             result[i] = self.pitch_trim_bit(sk, &sk.xor(&a[i], &b[i]));
         }
 
-        #[cfg(debug_assertions)]
-        {
-            println!(
-                "DEBUG: `e_xor_range` -> len(a)={}, len(b)={}, index_low={}, index_high={}",
-                a.len(),
-                b.len(),
-                index_low,
-                index_high
-            );
-        }
+        // #[cfg(debug_assertions)]
+        // {
+        //     println!(
+        //         "DEBUG: `e_xor_range` -> len(a)={}, len(b)={}, index_low={}, index_high={}",
+        //         a.len(),
+        //         b.len(),
+        //         index_low,
+        //         index_high
+        //     );
+        // }
     }
 
     /// Compute the encrypted NAND gate on the `Ciphertext` vectors `a` and `b`. The result is stored in
@@ -711,19 +711,19 @@ impl Processor for ProcessorBoolean {
             result[i] = self.pitch_trim_bit(sk, &sk.nand(&a[i], &b[i]));
         }
 
-        #[cfg(debug_assertions)]
-        {
-            println!("DEBUG: `e_nand` -> len(a)={}, len(b)={}", size, b.len());
-        }
+        // #[cfg(debug_assertions)]
+        // {
+        //     println!("DEBUG: `e_nand` -> len(a)={}, len(b)={}", size, b.len());
+        // }
     }
 
     fn e_nand_bit(&self, sk: &ServerKey, a: &Ciphertext, b: &Ciphertext) -> Ciphertext {
         let result: Ciphertext = self.pitch_trim_bit(sk, &sk.nand(a, b));
 
-        #[cfg(debug_assertions)]
-        {
-            println!("DEBUG: `e_nand_bit`");
-        }
+        // #[cfg(debug_assertions)]
+        // {
+        //     println!("DEBUG: `e_nand_bit`");
+        // }
         result
     }
 
@@ -747,16 +747,16 @@ impl Processor for ProcessorBoolean {
             result[i] = self.pitch_trim_bit(sk, &sk.nand(&a[i], &b[i]));
         }
 
-        #[cfg(debug_assertions)]
-        {
-            println!(
-                "DEBUG: `e_nand_range` -> len(a)={}, len(b)={}, index_low={}, index_high={}",
-                a.len(),
-                b.len(),
-                index_low,
-                index_high
-            );
-        }
+        // #[cfg(debug_assertions)]
+        // {
+        //     println!(
+        //         "DEBUG: `e_nand_range` -> len(a)={}, len(b)={}, index_low={}, index_high={}",
+        //         a.len(),
+        //         b.len(),
+        //         index_low,
+        //         index_high
+        //     );
+        // }
     }
 
     /// Compute the encrypted NOR gate on the `Ciphertext` vectors `a` and `b`. The result is stored in
@@ -774,19 +774,19 @@ impl Processor for ProcessorBoolean {
             result[i] = self.pitch_trim_bit(sk, &sk.nor(&a[i], &b[i]));
         }
 
-        #[cfg(debug_assertions)]
-        {
-            println!("DEBUG: `e_nor` -> len(a)={}, len(b)={}", size, b.len());
-        }
+        // #[cfg(debug_assertions)]
+        // {
+        //     println!("DEBUG: `e_nor` -> len(a)={}, len(b)={}", size, b.len());
+        // }
     }
 
     fn e_nor_bit(&self, sk: &ServerKey, a: &Ciphertext, b: &Ciphertext) -> Ciphertext {
         let result: Ciphertext = sk.nor(a, b);
 
-        #[cfg(debug_assertions)]
-        {
-            println!("DEBUG: `e_nor_bit`");
-        }
+        // #[cfg(debug_assertions)]
+        // {
+        //     println!("DEBUG: `e_nor_bit`");
+        // }
         result
     }
 
@@ -810,16 +810,16 @@ impl Processor for ProcessorBoolean {
             result[i] = self.pitch_trim_bit(sk, &sk.nor(&a[i], &b[i]));
         }
 
-        #[cfg(debug_assertions)]
-        {
-            println!(
-                "DEBUG: `e_nor_range` -> len(a)={}, len(b)={}, index_low={}, index_high={}",
-                a.len(),
-                b.len(),
-                index_low,
-                index_high
-            );
-        }
+        // #[cfg(debug_assertions)]
+        // {
+        //     println!(
+        //         "DEBUG: `e_nor_range` -> len(a)={}, len(b)={}, index_low={}, index_high={}",
+        //         a.len(),
+        //         b.len(),
+        //         index_low,
+        //         index_high
+        //     );
+        // }
     }
 
     /// Compute the encrypted XNOR gate on the `Ciphertext` vectors `a` and `b`. The result is stored in
@@ -843,19 +843,19 @@ impl Processor for ProcessorBoolean {
             result[i] = self.pitch_trim_bit(sk, &sk.xnor(&a[i], &b[i]));
         }
 
-        #[cfg(debug_assertions)]
-        {
-            println!("DEBUG: `e_xnor` -> len(a)={}, len(b)={}", size, b.len());
-        }
+        // #[cfg(debug_assertions)]
+        // {
+        //     println!("DEBUG: `e_xnor` -> len(a)={}, len(b)={}", size, b.len());
+        // }
     }
 
     fn e_xnor_bit(&self, sk: &ServerKey, a: &Ciphertext, b: &Ciphertext) -> Ciphertext {
         let result: Ciphertext = self.pitch_trim_bit(sk, &sk.xnor(a, b));
 
-        #[cfg(debug_assertions)]
-        {
-            println!("DEBUG: `e_xnor_bit`");
-        }
+        // #[cfg(debug_assertions)]
+        // {
+        //     println!("DEBUG: `e_xnor_bit`");
+        // }
         result
     }
 
@@ -879,16 +879,16 @@ impl Processor for ProcessorBoolean {
             result[i] = self.pitch_trim_bit(sk, &sk.xnor(&a[i], &b[i]));
         }
 
-        #[cfg(debug_assertions)]
-        {
-            println!(
-                "DEBUG: `e_xnor_range` -> len(a)={}, len(b)={}, index_low={}, index_high={}",
-                a.len(),
-                b.len(),
-                index_low,
-                index_high
-            );
-        }
+        // #[cfg(debug_assertions)]
+        // {
+        //     println!(
+        //         "DEBUG: `e_xnor_range` -> len(a)={}, len(b)={}, index_low={}, index_high={}",
+        //         a.len(),
+        //         b.len(),
+        //         index_low,
+        //         index_high
+        //     );
+        // }
     }
 
     /// Compute the encrypted NOT gate on the `Ciphertext` vector `a`. The result is stored in
@@ -905,19 +905,19 @@ impl Processor for ProcessorBoolean {
             result[i] = sk.not(&a[i]);
         }
 
-        #[cfg(debug_assertions)]
-        {
-            println!("DEBUG: `e_not` -> len(a)={}", size);
-        }
+        // #[cfg(debug_assertions)]
+        // {
+        //     println!("DEBUG: `e_not` -> len(a)={}", size);
+        // }
     }
 
     fn e_not_bit(&self, sk: &ServerKey, a: &Ciphertext) -> Ciphertext {
         let result: Ciphertext = sk.not(a);
 
-        #[cfg(debug_assertions)]
-        {
-            println!("DEBUG: `e_not_bit`");
-        }
+        // #[cfg(debug_assertions)]
+        // {
+        //     println!("DEBUG: `e_not_bit`");
+        // }
         result
     }
 
@@ -940,15 +940,15 @@ impl Processor for ProcessorBoolean {
             result[i] = sk.not(&a[i]);
         }
 
-        #[cfg(debug_assertions)]
-        {
-            println!(
-                "DEBUG: `e_not_range` -> len(a)={}, index_low={}, index_high={}",
-                a.len(),
-                index_low,
-                index_high
-            );
-        }
+        // #[cfg(debug_assertions)]
+        // {
+        //     println!(
+        //         "DEBUG: `e_not_range` -> len(a)={}, index_low={}, index_high={}",
+        //         a.len(),
+        //         index_low,
+        //         index_high
+        //     );
+        // }
     }
 
     fn e_shl(&self, a: &[Ciphertext], shift_amt: usize, result: &mut [Ciphertext]) {
@@ -1616,71 +1616,7 @@ impl Processor for ProcessorBoolean {
         self.e_mux(sk, &sign, &zero, &a, result);
     }
 
-    fn divider(
-        &self,
-        sk: &ServerKey,
-        a: &[Ciphertext],
-        b: &[Ciphertext],
-        result: &mut [Ciphertext],
-    ) {
-        let size = a.len();
-        //  Q is the dividend, copy the bits from a to Q
-        let mut Q: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
-        // A is the remainder, initialize to 0
-        let mut A: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
-        // M is the divisor, copy the bits from b to M
-        let mut M: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
-
-        let mut MSB: Ciphertext = sk.trivial_encrypt(false);
-        let zero: Ciphertext = sk.trivial_encrypt(false);
-        let mut A_msb: Ciphertext = sk.trivial_encrypt(false);
-        let mut not_A_msb: Ciphertext = sk.trivial_encrypt(false);
-        let mut A_tmp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
-        let mut Q_tmp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
-        let mut A_m: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
-
-        self.copy_to_from(&mut Q, &a);
-        self.copy_to_from(&mut M, &b);
-
-        for i in 0..size {
-            // Left shift Q, and replace the LSB with 0
-            self.e_shl_p(&Q, &zero, &mut Q_tmp);
-
-            // Store the MSB
-            MSB = Q[size - 1].clone();
-
-            // Update Q after shifting
-            self.copy_to_from(&mut Q, &Q_tmp);
-
-            if i != size - 1 {
-                // Left shift A and replace the LSB with MSB from the previous step
-                self.e_shl_p(&A, &MSB, &mut A_tmp);
-
-                // Compute A = A-M
-                self.subtracter(sk, &A_tmp, &M, &mut A);
-
-                // Get the MSB of A
-                A_msb = A[size - 1].clone();
-
-                // Compute Not(MSB of A)
-                not_A_msb = self.e_not_bit(sk, &A_msb);
-
-                // Replace the LSB of Q with NOT(MSB of A)
-                Q[0] = not_A_msb.clone();
-
-                // Compute A = A + M
-                self.adder(sk, &A, &M, &mut A_m);
-
-                // If MSB of A is 1, use A + M result, else keep A unchanged
-                self.e_mux(sk, &A_msb, &A_m, &A, &mut A_tmp);
-                self.copy_to_from(&mut A, &A_tmp);
-            }
-        }
-
-        self.copy_to_from(result, &Q);
-    }
-
-    fn modulo(
+    /*    fn divider(
         &self,
         sk: &ServerKey,
         a: &[Ciphertext],
@@ -1727,6 +1663,159 @@ impl Processor for ProcessorBoolean {
 
             // Compute Not(MSB of A)
             not_A_msb = self.e_not_bit(sk, &A_msb);
+            // Replace the LSB of Q with NOT(MSB of A)
+            Q[0] = not_A_msb.clone();
+            if i != size - 1 {
+                // Compute A = A + M
+                self.adder(sk, &A, &M, &mut A_m);
+
+                // If MSB of A is 1, use A + M result, else keep A unchanged
+                self.e_mux(sk, &A_msb, &A_m, &A, &mut A_tmp);
+                self.copy_to_from(&mut A, &A_tmp);
+            }
+        }
+
+        self.copy_to_from(result, &Q);
+    }*/
+
+    // For negatives?
+    fn divider(
+        &self,
+        sk: &ServerKey,
+        a: &[Ciphertext],
+        b: &[Ciphertext],
+        result: &mut [Ciphertext],
+    ) {
+        let size = a.len();
+        //  Q is the dividend, copy the bits from a to Q
+        let mut Q: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        // A is the remainder, initialize to 0
+        let mut A: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        // M is the divisor, copy the bits from b to M
+        let mut M: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+
+        let mut MSB: Ciphertext = sk.trivial_encrypt(false);
+        let zero: Ciphertext = sk.trivial_encrypt(false);
+        let mut A_msb: Ciphertext = sk.trivial_encrypt(false);
+        let mut not_A_msb: Ciphertext = sk.trivial_encrypt(false);
+        let mut A_tmp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        let mut Q_tmp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        let mut A_m: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        let mut M_tmp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+
+        let sign_bit = self.e_xor_bit(sk, &a[size - 1], &b[size - 1]);
+        let mut inv_res: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        let mut inv_res_tmp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        let mut ones: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        ones[0] = sk.trivial_encrypt(true);
+
+        // self.copy_to_from(&mut Q, &a);
+        // self.copy_to_from(&mut M, &b);
+
+        // Compute the two's complement of Q
+        self.e_not(sk, &a, &mut Q);
+        self.adder(sk, &Q, &ones, &mut Q_tmp);
+        self.e_mux(sk, &a[size - 1], &Q_tmp, &a, &mut Q);
+
+        // Compute the two's complement of M
+        self.e_not(sk, &b, &mut M);
+        self.adder(sk, &M, &ones, &mut M_tmp);
+        self.e_mux(sk, &b[size - 1], &M_tmp, &b, &mut M);
+
+        for i in 0..size {
+            // Left shift Q, and replace the LSB with 0
+            self.e_shl_p(&Q, &zero, &mut Q_tmp);
+
+            // Store the MSB
+            MSB = Q[size - 1].clone();
+
+            // Update Q after shifting
+            self.copy_to_from(&mut Q, &Q_tmp);
+
+            // Left shift A and replace the LSB with MSB from the previous step
+            self.e_shl_p(&A, &MSB, &mut A_tmp);
+
+            // Compute A = A-M
+            self.subtracter(sk, &A_tmp, &M, &mut A);
+
+            // Get the MSB of A
+            A_msb = A[size - 1].clone();
+
+            // Compute Not(MSB of A)
+            not_A_msb = self.e_not_bit(sk, &A_msb);
+
+            // Replace the LSB of Q with NOT(MSB of A)
+            Q[0] = not_A_msb.clone();
+            if i != size - 1 {
+                // Compute A = A + M
+                self.adder(sk, &A, &M, &mut A_m);
+
+                // If MSB of A is 1, use A + M result, else keep A unchanged
+                self.e_mux(sk, &A_msb, &A_m, &A, &mut A_tmp);
+                self.copy_to_from(&mut A, &A_tmp);
+            }
+        }
+
+        // Perform the two's complement
+        self.e_not(sk, &Q, &mut inv_res);
+        self.adder(sk, &inv_res, &ones, &mut inv_res_tmp);
+        self.e_mux(sk, &sign_bit, &inv_res_tmp, &Q, result);
+        // self.copy_to_from(result, &Q);
+    }
+
+    fn modulo(
+        &self,
+        sk: &ServerKey,
+        a: &[Ciphertext],
+        b: &[Ciphertext],
+        result: &mut [Ciphertext],
+    ) {
+        let size = a.len();
+        //  Q is the dividend, copy the bits from a to Q
+        let mut Q: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        // A is the remainder, initialize to 0
+        let mut A: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        // M is the divisor, copy the bits from b to M
+        let mut M: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+
+        let mut MSB: Ciphertext = sk.trivial_encrypt(false);
+        let zero: Ciphertext = sk.trivial_encrypt(false);
+        let mut A_msb: Ciphertext = sk.trivial_encrypt(false);
+        let mut not_A_msb: Ciphertext = sk.trivial_encrypt(false);
+        let mut A_tmp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        let mut Q_tmp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        let mut A_m: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+
+        let sign_bit = self.e_xor_bit(sk, &a[size - 1], &b[size - 1]);
+        let mut inv_res: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        let mut inv_res_tmp: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        let mut ones: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); size];
+        ones[0] = sk.trivial_encrypt(true);
+
+        self.copy_to_from(&mut Q, &a);
+        self.copy_to_from(&mut M, &b);
+
+        for i in 0..size {
+            // Left shift Q, and replace the LSB with 0
+            self.e_shl_p(&Q, &zero, &mut Q_tmp);
+
+            // Store the MSB
+            MSB = Q[size - 1].clone();
+
+            // Update Q after shifting
+            self.copy_to_from(&mut Q, &Q_tmp);
+
+            // Left shift A and replace the LSB with MSB from the previous step
+            self.e_shl_p(&A, &MSB, &mut A_tmp);
+
+            // Compute A = A-M
+            self.subtracter(sk, &A_tmp, &M, &mut A);
+
+            // Get the MSB of A
+            A_msb = A[size - 1].clone();
+
+            // Compute Not(MSB of A)
+            not_A_msb = self.e_not_bit(sk, &A_msb);
 
             // Replace the LSB of Q with NOT(MSB of A)
             Q[0] = not_A_msb.clone();
@@ -1739,6 +1828,10 @@ impl Processor for ProcessorBoolean {
             self.copy_to_from(&mut A, &A_tmp);
         }
 
+        // Perform the two's complement
+        self.e_not(sk, &A, &mut inv_res);
+        self.adder(sk, &inv_res, &ones, &mut inv_res_tmp);
+        self.e_mux(sk, &sign_bit, &inv_res_tmp, &A, result);
         self.copy_to_from(result, &A);
     }
 

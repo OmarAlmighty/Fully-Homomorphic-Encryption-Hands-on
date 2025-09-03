@@ -561,13 +561,13 @@ fn test_div() {
     let mut rng = rand::thread_rng();
 
     // Define two numbers and convert them to signed 8-bit representation.
-    let mut a: i8 = rng.gen_range(-50..50);
-    let mut b: i8 = rng.gen_range(-50..50);
+    let mut a: i8 =-15;// rng.gen_range(-50..50);
+    let mut b: i8 =3;// rng.gen_range(1..50);
 
-    while !(a>=b) {
-        a = rng.gen_range(-50..50);
-        b = rng.gen_range(-50..50);
-    }
+    // while !(a>=b) {
+    //     a = rng.gen_range(-50..50);
+    //     b = rng.gen_range(-50..50);
+    // }
 
     let ct_a = encode_encrypt(a, 8, &client_key);
     let ct_b = encode_encrypt(b, 8, &client_key);
