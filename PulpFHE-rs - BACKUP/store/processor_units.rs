@@ -18,7 +18,7 @@ use tfhe::boolean::server_key::RefreshEngine;
 
 pub trait Processor {
     /// Compute the encrypted AND gate on the `Ciphertext` vectors `a` and `b`. The result is stored in
-    ///  the ` result ` vector.
+    /// `result` vector.
     ///
     /// `PARAMETERS`.
     /// * `sk`: &ServerKey - The key which the server will use to perform the computation.
@@ -28,26 +28,8 @@ pub trait Processor {
     ///
     fn e_and(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]);
 
-    /// Compute the encrypted AND gate on single bit ciphertexts `a` and `b`.
-    ///
-    /// # Parameters
-    /// * `sk`: &ServerKey - The key which the server will use to perform the computation
-    /// * `a`: &Ciphertext - The first operand encrypting a single bit
-    /// * `b`: &Ciphertext - The second operand encrypting a single bit
-    ///
-    /// # Returns
-    /// * `Ciphertext` - The result of AND operation on the input bits
     fn e_and_bit(&self, sk: &ServerKey, a: &Ciphertext, b: &Ciphertext) -> Ciphertext;
 
-    /// Compute the encrypted AND gate on a range of bits from ciphertext vectors `a` and `b`.
-    ///
-    /// # Parameters
-    /// * `sk`: &ServerKey - The key which the server will use to perform the computation
-    /// * `a`: &[Ciphertext] - The first operand vector
-    /// * `b`: &[Ciphertext] - The second operand vector
-    /// * `result`: &mut [Ciphertext] - Vector to store the result
-    /// * `index_low`: usize - Starting index of the range
-    /// * `index_high`: usize - Ending index of the range
     fn e_and_range(
         &self,
         sk: &ServerKey,
@@ -59,7 +41,7 @@ pub trait Processor {
     );
 
     /// Compute the encrypted OR gate on the `Ciphertext` vectors `a` and `b`. The result is stored in
-    ///  the ` result ` vector.
+    /// `result` vector.
     ///
     /// `PARAMETERS`.
     /// * `sk`: &ServerKey - The key which the server will use to perform the computation.
@@ -69,26 +51,8 @@ pub trait Processor {
     ///
     fn e_or(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]);
 
-    /// Compute the encrypted OR gate on single bit ciphertexts `a` and `b`.
-    ///
-    /// # Parameters
-    /// * `sk`: &ServerKey - The key which the server will use to perform the computation
-    /// * `a`: &Ciphertext - The first operand encrypting a single bit
-    /// * `b`: &Ciphertext - The second operand encrypting a single bit
-    ///
-    /// # Returns
-    /// * `Ciphertext` - The result of OR operation on the input bits
     fn e_or_bit(&self, sk: &ServerKey, a: &Ciphertext, b: &Ciphertext) -> Ciphertext;
 
-    /// Compute the encrypted OR gate on a range of bits from ciphertext vectors `a` and `b`.
-    ///
-    /// # Parameters
-    /// * `sk`: &ServerKey - The key which the server will use to perform the computation
-    /// * `a`: &[Ciphertext] - The first operand vector
-    /// * `b`: &[Ciphertext] - The second operand vector
-    /// * `result`: &mut [Ciphertext] - Vector to store the result
-    /// * `index_low`: usize - Starting index of the range
-    /// * `index_high`: usize - Ending index of the range
     fn e_or_range(
         &self,
         sk: &ServerKey,
@@ -100,7 +64,7 @@ pub trait Processor {
     );
 
     /// Compute the encrypted XOR gate on the `Ciphertext` vectors `a` and `b`. The result is stored in
-    ///  the ` result ` vector.
+    /// `result` vector.
     ///
     /// `PARAMETERS`.
     /// * `sk`: &ServerKey - The key which the server will use to perform the computation.
@@ -121,7 +85,7 @@ pub trait Processor {
     );
 
     /// Compute the encrypted NAND gate on the `Ciphertext` vectors `a` and `b`. The result is stored in
-    ///  the ` result ` vector.
+    /// `result` vector.
     ///
     /// `PARAMETERS`.
     /// * `sk`: &ServerKey - The key which the server will use to perform the computation.
@@ -142,7 +106,7 @@ pub trait Processor {
     );
 
     /// Compute the encrypted NOR gate on the `Ciphertext` vectors `a` and `b`. The result is stored in
-    ///  the ` result ` vector.
+    /// `result` vector.
     ///
     /// `PARAMETERS`.
     /// * `sk`: &ServerKey - The key which the server will use to perform the computation.
@@ -163,7 +127,7 @@ pub trait Processor {
     );
 
     /// Compute the encrypted XNOR gate on the `Ciphertext` vectors `a` and `b`. The result is stored in
-    ///  the ` result ` vector.
+    /// `result` vector.
     ///
     /// `PARAMETERS`.
     /// * `sk`: &ServerKey - The key which the server will use to perform the computation.
@@ -184,7 +148,7 @@ pub trait Processor {
     );
 
     /// Compute the encrypted NOT gate on the `Ciphertext` vector `a`. The result is stored in
-    ///  the ` result ` vector.
+    /// `result` vector.
     ///
     /// `PARAMETERS`.
     /// * `sk`: &ServerKey - The key which the server will use to perform the computation.
@@ -208,7 +172,7 @@ pub trait Processor {
     /// The `e_shl` function takes an encrypted array (`a`) represented as a slice of `Ciphertext`
     /// and performs a left shift by `shift_amt` number of bits. The result of the operation
     /// is stored in the provided mutable slice `result`. The size of `result` must be
-    /// enough to hold the shifted ciphertexts. Encryption-specific keys (`ServerKey`)
+    /// sufficient to hold the shifted ciphertexts. Encryption-specific keys (`ServerKey`)
     /// are used to perform the operation safely in the cryptographic context.
     ///
     /// # Parameters
@@ -240,38 +204,11 @@ pub trait Processor {
     /// ```
     fn e_shl(&self, a: &[Ciphertext], shift_amt: usize, result: &mut [Ciphertext]);
 
-    /// Performs a right bitwise shift operation on an encrypted value.
-    ///
-    /// # Parameters
-    /// * `a`: &[Ciphertext] - The input encrypted array to be shifted
-    /// * `shift_amt`: usize - The number of bits to shift right
-    /// * `result`: &mut [Ciphertext] - The destination array for the shifted result
     fn e_shr(&self, a: &[Ciphertext], shift_amt: usize, result: &mut [Ciphertext]);
 
-    /// Performs a right rotation (circular shift) on an encrypted value.
-    ///
-    /// # Parameters
-    /// * `a`: &[Ciphertext] - The input encrypted array to be rotated
-    /// * `rot_amt`: usize - The number of positions to rotate right
-    /// * `result`: &mut [Ciphertext] - The destination array for the rotated result
     fn e_rotr(&self, a: &[Ciphertext], rot_amt: usize, result: &mut [Ciphertext]);
-
-    /// Performs a left rotation (circular shift) on an encrypted value.
-    ///
-    /// # Parameters  
-    /// * `a`: &[Ciphertext] - The input encrypted array to be rotated
-    /// * `rot_amt`: usize - The number of positions to rotate left
-    /// * `result`: &mut [Ciphertext] - The destination array for the rotated result
     fn e_rotl(&self, a: &[Ciphertext], rot_amt: usize, result: &mut [Ciphertext]);
 
-    /// Multiplexer (MUX) operation that selects between two encrypted arrays based on a selector bit.
-    ///
-    /// # Parameters
-    /// * `sk`: &ServerKey - The server key for homomorphic operations
-    /// * `selector`: &Ciphertext - The encrypted selector bit
-    /// * `ct_then`: &[Ciphertext] - The array to select if selector is 1
-    /// * `ct_else`: &[Ciphertext] - The array to select if selector is 0
-    /// * `result`: &mut [Ciphertext] - The destination array for the selected value
     fn e_mux(
         &self,
         sk: &ServerKey,
@@ -280,17 +217,6 @@ pub trait Processor {
         ct_else: &[Ciphertext],
         result: &mut [Ciphertext],
     );
-
-    /// Single bit multiplexer operation that selects between two encrypted bits.
-    ///
-    /// # Parameters
-    /// * `sk`: &ServerKey - The server key for homomorphic operations
-    /// * `selector`: &Ciphertext - The encrypted selector bit
-    /// * `ct_then`: &Ciphertext - The bit to select if selector is 1
-    /// * `ct_else`: &Ciphertext - The bit to select if selector is 0
-    ///
-    /// # Returns
-    /// * Ciphertext - The selected encrypted bit
     fn e_mux_bit(
         &self,
         sk: &ServerKey,
@@ -298,17 +224,6 @@ pub trait Processor {
         ct_then: &Ciphertext,
         ct_else: &Ciphertext,
     ) -> Ciphertext;
-
-    /// Multiplexer operation on a range of bits from the input arrays.
-    ///
-    /// # Parameters
-    /// * `sk`: &ServerKey - The server key for homomorphic operations  
-    /// * `selector`: &[Ciphertext] - The selector bits
-    /// * `ct_then`: &[Ciphertext] - The array to select from if selector is 1
-    /// * `ct_else`: &[Ciphertext] - The array to select from if selector is 0
-    /// * `result`: &mut [Ciphertext] - The destination array for selected values
-    /// * `index_low`: usize - The starting index of the range
-    /// * `index_high`: usize - The ending index of the range
     fn e_mux_range(
         &self,
         sk: &ServerKey,
@@ -320,34 +235,15 @@ pub trait Processor {
         index_high: usize,
     );
 
-    /// Compares two encrypted arrays and returns an encrypted bit indicating the result.
-    ///
-    /// # Parameters
-    /// * `sk`: &ServerKey - The server key for homomorphic operations
-    /// * `a`: &[Ciphertext] - First array to compare
-    /// * `b`: &[Ciphertext] - Second array to compare  
-    /// * `select`: u8 - Comparison type selector (e.g. equal, less than, etc.)
-    ///
-    /// # Returns
-    /// * Ciphertext - Encrypted bit representing comparison result
     fn comparator(
         &self,
         sk: &ServerKey,
         a: &[Ciphertext],
         b: &[Ciphertext],
         select: u8,
-    ) -> Ciphertext;
+        result: &mut [Ciphertext],
+    );
 
-    /// Compares two encrypted bits considering a carry bit from previous comparison.
-    ///
-    /// # Parameters
-    /// * `sk`: &ServerKey - The server key for homomorphic operations
-    /// * `a`: &Ciphertext - First bit to compare
-    /// * `b`: &Ciphertext - Second bit to compare
-    /// * `lsb_carry`: &Ciphertext - Carry bit from previous comparison
-    ///
-    /// # Returns  
-    /// * Ciphertext - Encrypted bit representing comparison result
     fn compare_bit(
         &self,
         sk: &ServerKey,
@@ -356,13 +252,6 @@ pub trait Processor {
         lsb_carry: &Ciphertext,
     ) -> Ciphertext;
 
-    /// Performs subtraction between two encrypted arrays.
-    ///
-    /// # Parameters
-    /// * `sk`: &ServerKey - The server key for homomorphic operations
-    /// * `a`: &[Ciphertext] - First operand array (minuend)
-    /// * `b`: &[Ciphertext] - Second operand array (subtrahend)
-    /// * `result`: &mut [Ciphertext] - Destination array for difference
     fn subtracter(
         &self,
         sk: &ServerKey,
@@ -371,38 +260,8 @@ pub trait Processor {
         result: &mut [Ciphertext],
     );
 
-    /// Performs addition between two encrypted arrays.
-    ///
-    /// # Parameters
-    /// * `sk`: &ServerKey - The server key for homomorphic operations
-    /// * `a`: &[Ciphertext] - First operand array
-    /// * `b`: &[Ciphertext] - Second operand array
-    /// * `result`: &mut [Ciphertext] - Destination array for sum
     fn adder(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]);
 
-    /// Performs signed addition between two encrypted arrays.
-    ///
-    /// # Parameters
-    /// * `sk`: &ServerKey - The server key for homomorphic operations
-    /// * `a`: &[Ciphertext] - First operand array (signed)
-    /// * `b`: &[Ciphertext] - Second operand array (signed)
-    /// * `result`: &mut [Ciphertext] - Destination array for signed sum
-    fn sign_adder(
-        &self,
-        sk: &ServerKey,
-        a: &[Ciphertext],
-        b: &[Ciphertext],
-        result: &mut [Ciphertext],
-    );
-
-    /// Performs a half adder operation on two encrypted bits.
-    ///
-    /// # Parameters
-    /// * `sk`: &ServerKey - The server key for homomorphic operations
-    /// * `a`: &Ciphertext - First input bit
-    /// * `b`: &Ciphertext - Second input bit
-    /// * `carry`: &mut Ciphertext - Output carry bit
-    /// * `result`: &mut Ciphertext - Output sum bit
     fn half_adder(
         &self,
         sk: &ServerKey,
@@ -412,15 +271,6 @@ pub trait Processor {
         result: &mut Ciphertext,
     );
 
-    /// Performs a carry-save adder operation on three encrypted bits.
-    ///
-    /// # Parameters
-    /// * `sk`: &ServerKey - The server key for homomorphic operations
-    /// * `a`: &Ciphertext - First input bit
-    /// * `b`: &Ciphertext - Second input bit
-    /// * `cin`: &Ciphertext - Input carry bit
-    /// * `carry`: &mut Ciphertext - Output carry bit
-    /// * `result`: &mut Ciphertext - Output sum bit
     fn carry_save_adder(
         &self,
         sk: &ServerKey,
@@ -431,14 +281,6 @@ pub trait Processor {
         result: &mut Ciphertext,
     );
 
-    /// Adds supplementary values during arithmetic operations.
-    ///
-    /// # Parameters
-    /// * `sk`: &ServerKey - The server key for homomorphic operations
-    /// * `a`: &[Ciphertext] - First operand array
-    /// * `b`: &[Ciphertext] - Second operand array
-    /// * `size`: usize - Size of operation
-    /// * `result`: &mut [Ciphertext] - Destination array
     fn add_supplement(
         &self,
         sk: &ServerKey,
@@ -448,13 +290,6 @@ pub trait Processor {
         result: &mut [Ciphertext],
     );
 
-    /// Performs multiplication between two encrypted arrays.
-    ///
-    /// # Parameters
-    /// * `sk`: &ServerKey - The server key for homomorphic operations
-    /// * `a`: &[Ciphertext] - First operand array
-    /// * `b`: &[Ciphertext] - Second operand array
-    /// * `result`: &mut [Ciphertext] - Destination array for product
     fn multiplier(
         &self,
         sk: &ServerKey,
@@ -462,14 +297,6 @@ pub trait Processor {
         b: &[Ciphertext],
         result: &mut [Ciphertext],
     );
-
-    /// Performs the BLAKE3 hash function on encrypted data.
-    ///
-    /// # Parameters
-    /// * `sk`: &ServerKey - The server key for homomorphic operations
-    /// * `msg`: Vec<&[Ciphertext]> - Input message blocks
-    /// * `v`: Vec<&[Ciphertext]> - Initial hash values
-    /// * `result`: &mut Vec<&mut [Ciphertext]> - Resulting hash values
     fn blake3(
         &self,
         sk: &ServerKey,
@@ -478,37 +305,12 @@ pub trait Processor {
         result: &mut Vec<&mut [Ciphertext]>,
     );
 
-    /// Finds the maximum value among encrypted arrays.
-    ///
-    /// # Parameters
-    /// * `sk`: &ServerKey - The server key for homomorphic operations
-    /// * `a`: &Vec<&[Ciphertext]> - Vector of input arrays
-    /// * `result`: &mut [Ciphertext] - Destination array for maximum value
     fn max(&self, sk: &ServerKey, a: &Vec<&[Ciphertext]>, result: &mut [Ciphertext]);
 
-    /// Finds the minimum value among encrypted arrays.
-    ///
-    /// # Parameters
-    /// * `sk`: &ServerKey - The server key for homomorphic operations
-    /// * `a`: &Vec<&[Ciphertext]> - Vector of input arrays
-    /// * `result`: &mut [Ciphertext] - Destination array for minimum value
     fn min(&self, sk: &ServerKey, a: &Vec<&[Ciphertext]>, result: &mut [Ciphertext]);
 
-    /// Applies ReLU (Rectified Linear Unit) function on encrypted array.
-    ///
-    /// # Parameters
-    /// * `sk`: &ServerKey - The server key for homomorphic operations
-    /// * `a`: &[Ciphertext] - Input array
-    /// * `result`: &mut [Ciphertext] - Destination array after ReLU
     fn relu(&self, sk: &ServerKey, a: &[Ciphertext], result: &mut [Ciphertext]);
 
-    /// Performs division between two encrypted arrays.
-    ///
-    /// # Parameters
-    /// * `sk`: &ServerKey - The server key for homomorphic operations
-    /// * `a`: &[Ciphertext] - Dividend array
-    /// * `b`: &[Ciphertext] - Divisor array
-    /// * `result`: &mut [Ciphertext] - Destination array for quotient
     fn divider(
         &self,
         sk: &ServerKey,
@@ -517,39 +319,12 @@ pub trait Processor {
         result: &mut [Ciphertext],
     );
 
-    /// Computes modulo operation between two encrypted arrays.
-    ///
-    /// # Parameters
-    /// * `sk`: &ServerKey - The server key for homomorphic operations
-    /// * `a`: &[Ciphertext] - Dividend array
-    /// * `b`: &[Ciphertext] - Modulus array
-    /// * `result`: &mut [Ciphertext] - Destination array for remainder
     fn modulo(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]);
 
-    /// Computes arithmetic mean of encrypted arrays.
-    ///
-    /// # Parameters
-    /// * `sk`: &ServerKey - The server key for homomorphic operations
-    /// * `a`: &Vec<&[Ciphertext]> - Vector of input arrays
-    /// * `count`: usize - Number of elements
-    /// * `result`: &mut [Ciphertext] - Destination array for mean
     fn mean(&self, sk: &ServerKey, a: &Vec<&[Ciphertext]>, count: usize, result: &mut [Ciphertext]);
 
-    /// Computes square root of encrypted array.
-    ///
-    /// # Parameters
-    /// * `sk`: &ServerKey - The server key for homomorphic operations
-    /// * `a`: &[Ciphertext] - Input array
-    /// * `result`: &mut [Ciphertext] - Destination array for square root
     fn sqrt(&self, sk: &ServerKey, a: &[Ciphertext], result: &mut [Ciphertext]);
 
-    /// Computes variance of encrypted arrays.
-    ///
-    /// # Parameters
-    /// * `sk`: &ServerKey - The server key for homomorphic operations
-    /// * `a`: &Vec<&[Ciphertext]> - Vector of input arrays
-    /// * `count`: usize - Number of elements
-    /// * `result`: &mut [Ciphertext] - Destination array for variance
     fn variance(
         &self,
         sk: &ServerKey,
@@ -558,13 +333,6 @@ pub trait Processor {
         result: &mut [Ciphertext],
     );
 
-    /// Computes standard deviation of encrypted arrays.
-    ///
-    /// # Parameters
-    /// * `sk`: &ServerKey - The server key for homomorphic operations
-    /// * `a`: &Vec<&[Ciphertext]> - Vector of input arrays
-    /// * `count`: usize - Number of elements
-    /// * `result`: &mut [Ciphertext] - Destination array for standard deviation
     fn standard_deviation(
         &self,
         sk: &ServerKey,

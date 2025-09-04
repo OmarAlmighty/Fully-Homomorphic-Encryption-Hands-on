@@ -351,7 +351,6 @@ fn test_shr() {
     assert_eq!(dec_res, a >> shift);
     println!("[✓] PASS: {fn_name}\n");
 }
-
 #[test]
 #[serial]
 fn test_e_rotr() {

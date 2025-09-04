@@ -15,3 +15,6 @@ No-boots/.DS_Store
 PulpFHE-rs/Cargo.lock
 PulpFHE-rs/Cargo.lock
 /FHE_Circuit_Debugger/.idea
+/PulpFHE-rs - BACKUP/.idea
+PulpFHE-rs - BACKUP/Cargo.lock
+/PulpFHE-rs - BACKUP/target/debug
