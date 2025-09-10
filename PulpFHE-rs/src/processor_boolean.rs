@@ -13,10 +13,11 @@
 //! homomorphically.
 //!
 
-use crate::processor_units::Processor;
+use crate::processor_circuits::ProcessorCircuits;
 use std::process::exit;
 use tfhe::boolean::prelude::*;
-use tfhe::boolean::server_key::RefreshEngine;
+use crate::processor_gates::ProcessorGate;
+use crate::pitch_trim_module::pitch_trim_module;
 
 #[cfg(test)]
 mod test_processor_boolean_8;
@@ -306,7 +307,7 @@ impl ProcessorBoolean {
         }
     }
 
-    fn ptxt_subtracter(&self, a: &[bool], b: &[bool], result: &mut [bool]) {
+/*    fn ptxt_subtracter(&self, a: &[bool], b: &[bool], result: &mut [bool]) {
         let size: usize = a.len();
 
         self.print_ptxt_vector(a, "a");
@@ -442,14 +443,10 @@ impl ProcessorBoolean {
             acc[i] = sum;
             carry = new_carry;
         }
-    }
+    }*/
 
-    /// ## 8x8 Signed Multiplier
-    ///
-    /// Multiplies two 8-bit signed integers `a` and `b`, encrypted bit-by-bit.
-    /// The input vectors are expected to be in little-endian format (LSB at index 0).
-    /// The 16-bit result is stored in the `result` slice.
-    fn new_multiplier(
+
+/*    fn new_multiplier(
         &self,
         sk: &ServerKey,
         a: &[Ciphertext],
@@ -510,14 +507,17 @@ impl ProcessorBoolean {
 
         // Subtract the final term from the result
         self.sub_vec(sk, result, &term);
-    }
+    }*/
 }
-impl Processor for ProcessorBoolean {
+
+impl ProcessorGate for ProcessorBoolean {
+
     fn e_and(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]) {
         let size: usize = a.len();
 
         for i in 0..size {
-            result[i] = self.pitch_trim_bit(sk, &sk.and(&a[i], &b[i]));
+            result[i] =  sk.and(&a[i], &b[i]);
+            result[i] = pitch_trim_module::pitch_trim_bit(sk, &result[i]);
         }
 
         // #[cfg(debug_assertions)]
@@ -527,7 +527,8 @@ impl Processor for ProcessorBoolean {
     }
 
     fn e_and_bit(&self, sk: &ServerKey, a: &Ciphertext, b: &Ciphertext) -> Ciphertext {
-        let result: Ciphertext = self.pitch_trim_bit(sk, &sk.and(a, b));
+        let mut result: Ciphertext = sk.and(a, b);
+        result = pitch_trim_module::pitch_trim_bit(sk, &mut result);
 
         // #[cfg(debug_assertions)]
         // {
@@ -553,7 +554,8 @@ impl Processor for ProcessorBoolean {
         );
 
         for i in index_low..index_high {
-            result[i] = self.pitch_trim_bit(sk, &sk.and(&a[i], &b[i]));
+            result[i] = sk.and(&a[i], &b[i]);
+            result[i] = pitch_trim_module::pitch_trim_bit(sk, &mut result[i]);
         }
 
         // #[cfg(debug_assertions)]
@@ -580,7 +582,8 @@ impl Processor for ProcessorBoolean {
     fn e_or(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]) {
         let size: usize = a.len();
         for i in 0..size {
-            result[i] = self.pitch_trim_bit(sk, &sk.or(&a[i], &b[i]));
+            result[i] = sk.or(&a[i], &b[i]);
+            result[i] = pitch_trim_module::pitch_trim_bit(sk, &mut result[i]);
         }
 
         // #[cfg(debug_assertions)]
@@ -590,7 +593,8 @@ impl Processor for ProcessorBoolean {
     }
 
     fn e_or_bit(&self, sk: &ServerKey, a: &Ciphertext, b: &Ciphertext) -> Ciphertext {
-        let result: Ciphertext = self.pitch_trim_bit(sk, &sk.or(a, b));
+        let mut result: Ciphertext = sk.or(a, b);
+        result = pitch_trim_module::pitch_trim_bit(sk, &mut result);
 
         // #[cfg(debug_assertions)]
         // {
@@ -616,7 +620,8 @@ impl Processor for ProcessorBoolean {
         );
 
         for i in index_low..index_high {
-            result[i] = self.pitch_trim_bit(sk, &sk.or(&a[i], &b[i]));
+            result[i] = sk.or(&a[i], &b[i]);
+            result[i] = pitch_trim_module::pitch_trim_bit(sk, &mut result[i]);
         }
 
         // #[cfg(debug_assertions)]
@@ -643,8 +648,8 @@ impl Processor for ProcessorBoolean {
     fn e_xor(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]) {
         let size: usize = a.len();
         for i in 0..size {
-            result[i] = self.pitch_trim_bit(sk, &sk.xor(&a[i], &b[i]));
-            result[i] = self.pitch_trim_bit(sk, &sk.xor(&a[i], &b[i]));
+            result[i] = sk.xor(&a[i], &b[i]);
+            result[i] = pitch_trim_module::pitch_trim_bit(sk, &mut result[i]);
         }
 
         // #[cfg(debug_assertions)]
@@ -654,7 +659,8 @@ impl Processor for ProcessorBoolean {
     }
 
     fn e_xor_bit(&self, sk: &ServerKey, a: &Ciphertext, b: &Ciphertext) -> Ciphertext {
-        let result: Ciphertext = self.pitch_trim_bit(sk, &sk.xor(a, b));
+        let mut result: Ciphertext = sk.xor(a, b);
+        result = pitch_trim_module::pitch_trim_bit(sk, &mut result);
 
         // #[cfg(debug_assertions)]
         // {
@@ -680,7 +686,8 @@ impl Processor for ProcessorBoolean {
         );
 
         for i in index_low..index_high {
-            result[i] = self.pitch_trim_bit(sk, &sk.xor(&a[i], &b[i]));
+            result[i] = sk.xor(&a[i], &b[i]);
+            result[i] = pitch_trim_module::pitch_trim_bit(sk, &mut result[i]);
         }
 
         // #[cfg(debug_assertions)]
@@ -713,7 +720,8 @@ impl Processor for ProcessorBoolean {
     ) {
         let size: usize = a.len();
         for i in 0..size {
-            result[i] = self.pitch_trim_bit(sk, &sk.nand(&a[i], &b[i]));
+            result[i] = sk.nand(&a[i], &b[i]);
+            result[i] = pitch_trim_module::pitch_trim_bit(sk, &mut result[i]);
         }
 
         // #[cfg(debug_assertions)]
@@ -723,8 +731,8 @@ impl Processor for ProcessorBoolean {
     }
 
     fn e_nand_bit(&self, sk: &ServerKey, a: &Ciphertext, b: &Ciphertext) -> Ciphertext {
-        let result: Ciphertext = self.pitch_trim_bit(sk, &sk.nand(a, b));
-
+        let mut result: Ciphertext = sk.nand(a, b);
+        result = pitch_trim_module::pitch_trim_bit(sk, &mut result);
         // #[cfg(debug_assertions)]
         // {
         //     println!("DEBUG: `e_nand_bit`");
@@ -749,7 +757,8 @@ impl Processor for ProcessorBoolean {
         );
 
         for i in index_low..index_high {
-            result[i] = self.pitch_trim_bit(sk, &sk.nand(&a[i], &b[i]));
+            result[i] = sk.nand(&a[i], &b[i]);
+            result[i] = pitch_trim_module::pitch_trim_bit(sk, &mut result[i]);
         }
 
         // #[cfg(debug_assertions)]
@@ -776,7 +785,8 @@ impl Processor for ProcessorBoolean {
     fn e_nor(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]) {
         let size: usize = a.len();
         for i in 0..size {
-            result[i] = self.pitch_trim_bit(sk, &sk.nor(&a[i], &b[i]));
+            result[i] = sk.nor(&a[i], &b[i]);
+            result[i] = pitch_trim_module::pitch_trim_bit(sk, &mut result[i]);
         }
 
         // #[cfg(debug_assertions)]
@@ -786,8 +796,8 @@ impl Processor for ProcessorBoolean {
     }
 
     fn e_nor_bit(&self, sk: &ServerKey, a: &Ciphertext, b: &Ciphertext) -> Ciphertext {
-        let result: Ciphertext = sk.nor(a, b);
-
+        let mut result: Ciphertext = sk.nor(a, b);
+        result = pitch_trim_module::pitch_trim_bit(sk, &mut result);
         // #[cfg(debug_assertions)]
         // {
         //     println!("DEBUG: `e_nor_bit`");
@@ -812,7 +822,8 @@ impl Processor for ProcessorBoolean {
         );
 
         for i in index_low..index_high {
-            result[i] = self.pitch_trim_bit(sk, &sk.nor(&a[i], &b[i]));
+            result[i] = sk.nor(&a[i], &b[i]);
+            result[i] = pitch_trim_module::pitch_trim_bit(sk, &mut result[i]);
         }
 
         // #[cfg(debug_assertions)]
@@ -845,7 +856,8 @@ impl Processor for ProcessorBoolean {
     ) {
         let size: usize = a.len();
         for i in 0..size {
-            result[i] = self.pitch_trim_bit(sk, &sk.xnor(&a[i], &b[i]));
+            result[i] = sk.xnor(&a[i], &b[i]);
+            result[i] = pitch_trim_module::pitch_trim_bit(sk, &mut result[i]);
         }
 
         // #[cfg(debug_assertions)]
@@ -855,7 +867,8 @@ impl Processor for ProcessorBoolean {
     }
 
     fn e_xnor_bit(&self, sk: &ServerKey, a: &Ciphertext, b: &Ciphertext) -> Ciphertext {
-        let result: Ciphertext = self.pitch_trim_bit(sk, &sk.xnor(a, b));
+        let mut result: Ciphertext = sk.xnor(a, b);
+        result = pitch_trim_module::pitch_trim_bit(sk, &mut result);
 
         // #[cfg(debug_assertions)]
         // {
@@ -881,7 +894,8 @@ impl Processor for ProcessorBoolean {
         );
 
         for i in index_low..index_high {
-            result[i] = self.pitch_trim_bit(sk, &sk.xnor(&a[i], &b[i]));
+            result[i] = sk.xnor(&a[i], &b[i]);
+            result[i] = pitch_trim_module::pitch_trim_bit(sk, &mut result[i]);
         }
 
         // #[cfg(debug_assertions)]
@@ -955,44 +969,6 @@ impl Processor for ProcessorBoolean {
         //     );
         // }
     }
-
-    fn e_shl(&self, a: &[Ciphertext], shift_amt: usize, result: &mut [Ciphertext]) {
-        // Arithmetic shift left (same as logical shift left)
-        let mut a = a.to_vec();
-        a.reverse();
-        let mut tmp = a[shift_amt..].to_vec();
-        tmp.extend(vec![Ciphertext::Trivial(false); shift_amt]);
-        tmp.reverse();
-        self.copy_to_from(result, &tmp);
-    }
-
-    fn e_shr(&self, a: &[Ciphertext], shift_amt: usize, result: &mut [Ciphertext]) {
-        if a.is_empty() {
-            self.copy_to_from(result, a);
-            return;
-        }
-        let mut a = a.to_vec();
-        a.reverse();
-        let mut shifted = vec![a[0].clone(); shift_amt]; // extend sign bit
-        shifted.extend_from_slice(&a[..a.len().saturating_sub(shift_amt)]);
-        shifted.reverse();
-        self.copy_to_from(result, &shifted);
-    }
-
-    fn e_rotr(&self, a: &[Ciphertext], rot_amt: usize, result: &mut [Ciphertext]) {
-        let mut tmp = a.to_vec();
-        // The reverse of the operation because of the binary encoding is LSB...MSB
-        tmp.rotate_left(rot_amt % a.len());
-        self.copy_to_from(result, &tmp);
-    }
-
-    fn e_rotl(&self, a: &[Ciphertext], rot_amt: usize, result: &mut [Ciphertext]) {
-        let mut tmp = a.to_vec();
-        // The reverse of the operation because of the binary encoding is LSB...MSB
-        tmp.rotate_right(rot_amt % a.len());
-        self.copy_to_from(result, &tmp);
-    }
-
     fn e_mux(
         &self,
         sk: &ServerKey,
@@ -1030,6 +1006,46 @@ impl Processor for ProcessorBoolean {
         for i in index_low..index_high {
             result[i] = sk.mux(&selector[i], &ct_then[i], &ct_else[i]);
         }
+    }
+
+}
+impl ProcessorCircuits for ProcessorBoolean {
+
+    fn e_shl(&self, a: &[Ciphertext], shift_amt: usize, result: &mut [Ciphertext]) {
+        // Arithmetic shift left (same as logical shift left)
+        let mut a = a.to_vec();
+        a.reverse();
+        let mut tmp = a[shift_amt..].to_vec();
+        tmp.extend(vec![Ciphertext::Trivial(false); shift_amt]);
+        tmp.reverse();
+        self.copy_to_from(result, &tmp);
+    }
+
+    fn e_shr(&self, a: &[Ciphertext], shift_amt: usize, result: &mut [Ciphertext]) {
+        if a.is_empty() {
+            self.copy_to_from(result, a);
+            return;
+        }
+        let mut a = a.to_vec();
+        a.reverse();
+        let mut shifted = vec![a[0].clone(); shift_amt]; // extend sign bit
+        shifted.extend_from_slice(&a[..a.len().saturating_sub(shift_amt)]);
+        shifted.reverse();
+        self.copy_to_from(result, &shifted);
+    }
+
+    fn e_rotr(&self, a: &[Ciphertext], rot_amt: usize, result: &mut [Ciphertext]) {
+        let mut tmp = a.to_vec();
+        // The reverse of the operation because of the binary encoding is LSB...MSB
+        tmp.rotate_left(rot_amt % a.len());
+        self.copy_to_from(result, &tmp);
+    }
+
+    fn e_rotl(&self, a: &[Ciphertext], rot_amt: usize, result: &mut [Ciphertext]) {
+        let mut tmp = a.to_vec();
+        // The reverse of the operation because of the binary encoding is LSB...MSB
+        tmp.rotate_right(rot_amt % a.len());
+        self.copy_to_from(result, &tmp);
     }
 
     fn comparator(
@@ -1783,17 +1799,5 @@ impl Processor for ProcessorBoolean {
         }
     }
 
-    fn pitch_trim(&self, sk: &ServerKey, ctxt: &mut [Ciphertext]) -> Vec<Ciphertext> {
-        let mut fresh: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); ctxt.len()];
-        for c in ctxt {
-            let f = sk.bootstrap(c);
-            fresh.push(f);
-        }
-        fresh
-    }
 
-    fn pitch_trim_bit(&self, sk: &ServerKey, ctxt: &Ciphertext) -> Ciphertext {
-        let mut fresh: Ciphertext = sk.bootstrap(ctxt);
-        fresh
-    }
 }

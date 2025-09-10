@@ -383,7 +383,7 @@ class Controller:
                 if curnt_entry != "-1":
                     # If the wait_for cell is null, then we can use the stored value
                     # Otherwise, we get the reservation station ID.
-                    # This is applied for operand1 and operand2 
+                    # This is applied for operand1 and operand2
                     if curnt_entry.wait_for == "-":
                         operand1 = curnt_entry.value
                         self.OR_RS[0].Val1 = operand1.strip()

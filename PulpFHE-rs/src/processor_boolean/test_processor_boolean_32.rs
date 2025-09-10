@@ -518,38 +518,6 @@ fn test_multiplier() {
     println!("[✓] PASS: {fn_name}\n");
 }
 
-// #[test]
-// #[serial]
-fn test_newmultiplier() {
-    let fn_name = "multiplier";
-    println!("[*] TEST: {fn_name}");
-    let (client_key, server_key) = gen_keys();
-
-    let server = ProcessorBoolean;
-    let mut rng = rand::thread_rng();
-
-    // Define two numbers and convert them to signed 32-bit represfentation.
-    let a: i32 = -3; //rng.gen_range(-10..10);
-    let b: i32 = 7; //rng.gen_range(-10..10);
-    let enc_a = encode(a, 32);
-    let enc_b = encode(b, 32);
-    let mut res: Vec<bool> = vec![false; 32];
-
-    let ct_a = encode_encrypt(a, 32, &client_key);
-    let ct_b = encode_encrypt(b, 32, &client_key);
-    let mut ct_result: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); 32];
-
-    //server.ptxt_multiplier(&enc_a, &enc_b, &mut res);
-    println!("{a} * {b} = {}", decode(&res));
-    println!("{:?} * {:?} = {:?}", enc_a, enc_b, res);
-
-    server.new_multiplier(&server_key, &ct_a, &ct_b, &mut ct_result);
-
-    let dec_res = new_decrypt_decode(&ct_result, &client_key);
-    println!("\t {} {} {} = {}", a, b, fn_name, dec_res);
-    assert_eq!(dec_res, a.wrapping_mul(b) as i32);
-    println!("[✓] PASS: {fn_name}\n");
-}
 #[test]
 #[serial]
 fn test_div() {

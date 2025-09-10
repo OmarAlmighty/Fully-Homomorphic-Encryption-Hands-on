@@ -475,7 +475,7 @@ fn test_subtracter() {
     let mut result: Vec<bool> = vec![false; 8];
 
     println!("{a} - {b}");
-    server.ptxt_subtracter(&encode(a, 8), &encode(b, 8), &mut result);
+    //server.ptxt_subtracter(&encode(a, 8), &encode(b, 8), &mut result);
 
     server.subtracter(&server_key, &ct_a, &ct_b, &mut ct_result);
 
@@ -506,7 +506,7 @@ fn test_multiplier() {
     let ct_b = encode_encrypt(b, 8, &client_key);
     let mut ct_result: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); ct_a.len()];
 
-    server.ptxt_multiplier(&enc_a, &enc_b, &mut res);
+    //server.ptxt_multiplier(&enc_a, &enc_b, &mut res);
     println!("{a} * {b} = {}", decode(&res));
     println!("{:?} * {:?} = {:?}", enc_a, enc_b, res);
 
@@ -539,11 +539,11 @@ fn test_newmultiplier() {
     let ct_b = encode_encrypt(b, 8, &client_key);
     let mut ct_result: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); 16];
 
-    server.ptxt_multiplier(&enc_a, &enc_b, &mut res);
+    //server.ptxt_multiplier(&enc_a, &enc_b, &mut res);
     println!("{a} * {b} = {}", decode(&res));
     println!("{:?} * {:?} = {:?}", enc_a, enc_b, res);
 
-    server.new_multiplier(&server_key, &ct_a, &ct_b, &mut ct_result);
+    //server.new_multiplier(&server_key, &ct_a, &ct_b, &mut ct_result);
 
     let dec_res = new_decrypt_decode(&ct_result, &client_key);
     println!("\t {} {} {} = {}", a, b, fn_name, dec_res);
