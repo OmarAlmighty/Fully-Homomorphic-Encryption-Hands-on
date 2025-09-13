@@ -1,243 +1,224 @@
-use crate::register_table::{RegisterElement, Subscriber, RegisterTable};
+use crate::register_table::{RegisterElement, RegisterTable, Subscriber};
 use tfhe::boolean::prelude::*;
 
 // Shape trait that extends Subscriber
-pub trait rs_entry: Subscriber {
-    fn get_id(&self) -> String;
-    fn set_id(&mut self, id: String);
-
-    fn get_busy(&self) -> bool;
-    fn set_busy(&mut self, busy: bool);
-
-    fn get_rs1(&self) -> String;
-    fn set_rs1(&mut self, rs1: String);
-
-    fn get_rs2(&self) -> String;
-    fn set_rs2(&mut self, rs2: String);
-
-    fn get_val1(&self) -> Ciphertext;
-    fn set_val1(&mut self, val1: Ciphertext);
-
-    fn get_val2(&self) -> Ciphertext;
-    fn set_val2(&mut self, val2: Ciphertext);
-
-    fn get_dst(&self) -> String;
-    fn set_dst(&mut self, dst: String);
-}
-
-pub struct AND_rs {
+pub struct RsEntry {
     id: String,
     busy: bool,
     rs1: String,
     rs2: String,
-    val1: Ciphertext,
-    val2: Ciphertext,
+    val1: Option<Vec<Ciphertext>>,
+    val2: Option<Vec<Ciphertext>>,
     dst: String,
 }
 
-pub struct OR_rs {
-    id: String,
-    busy: bool,
-    rs1: String,
-    rs2: String,
-    val1: Ciphertext,
-    val2: Ciphertext,
-    dst: String,
-}
-
-pub struct XOR_rs {
-    id: String,
-    busy: bool,
-    rs1: String,
-    rs2: String,
-    val1: Ciphertext,
-    val2: Ciphertext,
-    dst: String,
-}
-
-pub struct NAND_rs {
-    id: String,
-    busy: bool,
-    rs1: String,
-    rs2: String,
-    val1: Ciphertext,
-    val2: Ciphertext,
-    dst: String,
-}
-
-pub struct NOR_rs {
-    id: String,
-    busy: bool,
-    rs1: String,
-    rs2: String,
-    val1: Ciphertext,
-    val2: Ciphertext,
-    dst: String,
-}
-
-pub struct XNOR_rs {
-    id: String,
-    busy: bool,
-    rs1: String,
-    rs2: String,
-    val1: Ciphertext,
-    val2: Ciphertext,
-    dst: String,
-}
-
-impl AND_rs {
+impl RsEntry {
     pub fn new(
         id: String,
-        busy: bool,
+        busy: bool,       
         rs1: String,
         rs2: String,
-        val1: Ciphertext,
-        val2: Ciphertext,
+        val1: Option<Vec<Ciphertext>>,
+        val2: Option<Vec<Ciphertext>>,
         dst: String,
     ) -> Self {
-        AND_rs {id, busy, rs1, rs2, val1, val2, dst}
+        Self {
+            id,
+            busy,
+            rs1,
+            rs2,
+            val1,
+            val2,
+            dst,
+        }
     }
+}
+pub struct AND_rs {
+    entries: Vec<RsEntry>,
+}
+impl AND_rs {
+    pub fn new() -> Self {
+        Self {
+            entries: Vec::new(),
+        }
+    }
+    pub fn add_entry(
+        &mut self,
+        id: String,
+        rs1: String,
+        rs2: String,
+        val1: Option<Vec<Ciphertext>>,
+        val2: Option<Vec<Ciphertext>>,
+        dst: String,
+    ) {
+        let entry = RsEntry::new(id, true, rs1, rs2, val1, val2, dst);
+        self.entries.push(entry);
+    }
+}
+pub struct OR_rs {
+    entries: Vec<RsEntry>,
 }
 
 impl OR_rs {
-    pub fn new(
+    pub fn new() -> Self {
+        Self {
+            entries: Vec::new(),
+        }
+    }
+    pub fn add_entry(
+        &mut self,
         id: String,
-        busy: bool,
         rs1: String,
         rs2: String,
-        val1: Ciphertext,
-        val2: Ciphertext,
+        val1: Option<Vec<Ciphertext>>,
+        val2: Option<Vec<Ciphertext>>,
         dst: String,
-    ) -> Self {
-        OR_rs {id, busy, rs1, rs2, val1, val2, dst}
+    ) {
+        let entry = RsEntry::new(id, true, rs1, rs2, val1, val2, dst);
+        self.entries.push(entry);
     }
+}
+pub struct XOR_rs {
+    entries: Vec<RsEntry>,
 }
 
 impl XOR_rs {
-    pub fn new(
+    pub fn new() -> Self {
+        Self {
+            entries: Vec::new(),
+        }
+    }
+    pub fn add_entry(
+        &mut self,
         id: String,
-        busy: bool,
         rs1: String,
         rs2: String,
-        val1: Ciphertext,
-        val2: Ciphertext,
+        val1: Option<Vec<Ciphertext>>,
+        val2: Option<Vec<Ciphertext>>,
         dst: String,
-    ) -> Self {
-        XOR_rs {id, busy, rs1, rs2, val1, val2, dst}
+    ) {
+        let entry = RsEntry::new(id, true, rs1, rs2, val1, val2, dst);
+        self.entries.push(entry);
     }
 }
-
+pub struct NAND_rs {
+    entries: Vec<RsEntry>,
+}
 impl NAND_rs {
-    pub fn new(
+    pub fn new() -> Self {
+        Self {
+            entries: Vec::new(),
+        }
+    }
+    pub fn add_entry(
+        &mut self,
         id: String,
-        busy: bool,
         rs1: String,
         rs2: String,
-        val1: Ciphertext,
-        val2: Ciphertext,
+        val1: Option<Vec<Ciphertext>>,
+        val2: Option<Vec<Ciphertext>>,
         dst: String,
-    ) -> Self {
-        NAND_rs {id, busy, rs1, rs2, val1, val2, dst}
+    ) {
+        let entry = RsEntry::new(id, true, rs1, rs2, val1, val2, dst);
+        self.entries.push(entry);
     }
+}
+pub struct NOR_rs {
+    entries: Vec<RsEntry>,
 }
 
 impl NOR_rs {
-    pub fn new(
+    pub fn new() -> Self {
+        Self {
+            entries: Vec::new(),
+        }
+    }
+    pub fn add_entry(
+        &mut self,
         id: String,
-        busy: bool,
         rs1: String,
         rs2: String,
-        val1: Ciphertext,
-        val2: Ciphertext,
+        val1: Option<Vec<Ciphertext>>,
+        val2: Option<Vec<Ciphertext>>,
         dst: String,
-    ) -> Self {
-        NOR_rs {id, busy, rs1, rs2, val1, val2, dst}
+    ) {
+        let entry = RsEntry::new(id, true, rs1, rs2, val1, val2, dst);
+        self.entries.push(entry);
     }
+}
+
+pub struct XNOR_rs {
+    entries: Vec<RsEntry>,
 }
 
 impl XNOR_rs {
-    pub fn new(
+    pub fn new() -> Self {
+        Self {
+            entries: Vec::new(),
+        }
+    }
+    pub fn add_entry(
+        &mut self,
         id: String,
-        busy: bool,
         rs1: String,
         rs2: String,
-        val1: Ciphertext,
-        val2: Ciphertext,
+        val1: Option<Vec<Ciphertext>>,
+        val2: Option<Vec<Ciphertext>>,
         dst: String,
-    ) -> Self {
-        XNOR_rs {id, busy, rs1, rs2, val1, val2, dst}
+    ) {
+        let entry = RsEntry::new(id, true, rs1, rs2, val1, val2, dst);
+        self.entries.push(entry);
     }
 }
-
-impl rs_entry for AND_rs {
-    fn get_id(&self) -> String {self.id.clone()}
-    fn set_id(&mut self, id: String) {self.id = id}
-
-    fn get_busy(&self) -> bool {
-        self.busy
-    }
-    fn set_busy(&mut self, busy: bool) {
-        self.busy = busy
-    }
-
-    fn get_rs1(&self) -> String {
-        self.rs1.clone()
-    }
-
-    fn set_rs1(&mut self, rs1: String) {
-        self.rs1 = rs1.clone()
-    }
-
-    fn get_rs2(&self) -> String {
-        self.rs2.clone()
-    }
-
-    fn set_rs2(&mut self, rs2: String) {
-        self.rs2 = rs2.clone()
-    }
-
-    fn get_val1(&self) -> Ciphertext {
-        self.val1.clone()
-    }
-
-    fn set_val1(&mut self, val1: Ciphertext) {
-        self.val1 = val1.clone()
-    }
-
-    fn get_val2(&self) -> Ciphertext {
-        self.val2.clone()
-    }
-
-    fn set_val2(&mut self, val2: Ciphertext) {
-        self.val2 = val2.clone()
-    }
-
-    fn get_dst(&self) -> String {
-        self.dst.clone()
-    }
-
-    fn set_dst(&mut self, dst: String) {
-        self.dst = dst.clone()
-    }
-}
-
 impl Subscriber for AND_rs {
+    fn decode(&self, code: u8, index: usize, dst: String) {
+        // code = 1 --> a new element is added to the register table
+        if code == 1 {
+            for (i, e) in self.entries.iter().enumerate() {
+                if e.busy == true {
+                    todo!()
+                }
+            }
+        }
+        // code = 2 --> an element is removed by indx
+        else if code == 2 {
+            todo!()
+        }
+        // code = 3 --> an element is updated by indx
+        else if code == 3 {
+        }
+        // code = 4 --> an element is removed by dst
+        else if code == 4 {
+        }
+        // code = 5 --> an element is updated by dst
+        else if code == 5 {
+        }
+    }
+
     fn update(&mut self, element: RegisterElement) {
-        if element.dst == self.dst{
-            let new_element: RegisterElement = RegisterElement::new(self.dst, self.id, self.)
+        if element.dst == self.dst {
+            //let new_element: RegisterElement = RegisterElement::new(self.dst, self.id, self.)
         }
         if element.dst == self.rs1 {
-            self.val1 = element.ctxt;
+            self.val1 = element.vec_ctxt;
         } else if element.dst == self.rs2 {
-            self.val2 = element.ctxt;
+            self.val2 = element.vec_ctxt;
         }
     }
 
     fn add(&mut self, reg_elmnt: RegisterElement) {
         if reg_elmnt.dst == self.rs1 {
-            self.val1 = reg_elmnt.ctxt;
+            self.val1 = reg_elmnt.vec_ctxt;
         } else if reg_elmnt.dst == self.rs2 {
-            self.val2 = reg_elmnt.ctxt;
+            self.val2 = reg_elmnt.vec_ctxt;
         }
+    }
+
+    fn fetch(&self, dst: String) {
+        todo!()
+    }
+
+    fn remove(&mut self, dst: String) {
+        todo!()
     }
 }

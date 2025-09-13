@@ -13,21 +13,21 @@
 //! homomorphically.
 //!
 
+use crate::pitch_trim_module::pitch_trim_module;
 use crate::processor_circuits::ProcessorCircuits;
+use crate::processor_gates::ProcessorGate;
 use std::process::exit;
 use tfhe::boolean::prelude::*;
-use crate::processor_gates::ProcessorGate;
-use crate::pitch_trim_module::pitch_trim_module;
 
-#[cfg(test)]
-mod test_processor_boolean_8;
 #[cfg(test)]
 mod test_processor_boolean_16;
 #[cfg(test)]
 mod test_processor_boolean_32;
+#[cfg(test)]
+mod test_processor_boolean_8;
 
 pub struct ProcessorBoolean;
-
+use std::time::{Duration, Instant};
 impl ProcessorBoolean {
     /// A helper function for performing division and modulo operations.
     fn e_shl_p(&self, a: &[Ciphertext], LSB: &Ciphertext, result: &mut [Ciphertext]) {
@@ -307,7 +307,7 @@ impl ProcessorBoolean {
         }
     }
 
-/*    fn ptxt_subtracter(&self, a: &[bool], b: &[bool], result: &mut [bool]) {
+    /*    fn ptxt_subtracter(&self, a: &[bool], b: &[bool], result: &mut [bool]) {
         let size: usize = a.len();
 
         self.print_ptxt_vector(a, "a");
@@ -445,8 +445,7 @@ impl ProcessorBoolean {
         }
     }*/
 
-
-/*    fn new_multiplier(
+    /*    fn new_multiplier(
         &self,
         sk: &ServerKey,
         a: &[Ciphertext],
@@ -508,15 +507,397 @@ impl ProcessorBoolean {
         // Subtract the final term from the result
         self.sub_vec(sk, result, &term);
     }*/
+
+    fn e_and_bench(
+        &self,
+        sk: &ServerKey,
+        a: &[Ciphertext],
+        b: &[Ciphertext],
+        result: &mut [Ciphertext],
+    ) {
+        let size: usize = a.len();
+
+        println!("====================AND====================");
+        let start = Instant::now();
+        for i in 0..size {
+            result[i] = sk.and(&a[i], &b[i]);
+        }
+        let duration1 = start.elapsed();
+
+        let start = Instant::now();
+        for i in 0..size {
+            result[i] = pitch_trim_module::pitch_trim_bit(sk, &result[i]);
+        }
+        let duration2 = start.elapsed();
+
+        println!(
+            "Gate Operation Time: {:.3?}, Bootstrapping Time: {:.3?}",
+            duration1.as_millis(),
+            duration2.as_millis()
+        );
+        if duration1.as_millis() == 0 {
+            println!(
+                "Bootstrapping / Gate (0): {:.3?}",
+                duration2.as_millis()
+            );
+        }else {
+            println!(
+                "Bootstrapping / Gate: {:.3?}",
+                duration2.as_millis() / duration1.as_millis()
+            );
+        }
+        println!("==========================================\n");
+    }
+    fn e_or_bench(
+        &self,
+        sk: &ServerKey,
+        a: &[Ciphertext],
+        b: &[Ciphertext],
+        result: &mut [Ciphertext],
+    ) {
+        let size: usize = a.len();
+        println!("====================OR====================");
+        let start = Instant::now();
+        for i in 0..size {
+            result[i] = sk.or(&a[i], &b[i]);
+        }
+        let duration1 = start.elapsed();
+
+        let start = Instant::now();
+        for i in 0..size {
+            result[i] = pitch_trim_module::pitch_trim_bit(sk, &result[i]);
+        }
+        let duration2 = start.elapsed();
+
+        println!(
+            "Gate Operation Time: {:.3?}, Bootstrapping Time: {:.3?}",
+            duration1.as_millis(),
+            duration2.as_millis()
+        );
+        if duration1.as_millis() == 0 {
+            println!(
+                "Bootstrapping / Gate (0): {:.3?}",
+                duration2.as_millis()
+            );
+        }else {
+            println!(
+                "Bootstrapping / Gate: {:.3?}",
+                duration2.as_millis() / duration1.as_millis()
+            );
+        }
+        println!("==========================================\n");
+    }
+    fn e_xor_bench(
+        &self,
+        sk: &ServerKey,
+        a: &[Ciphertext],
+        b: &[Ciphertext],
+        result: &mut [Ciphertext],
+    ) {
+        let size: usize = a.len();
+        println!("====================XOR====================");
+        let start = Instant::now();
+
+        for i in 0..size {
+            result[i] = sk.xor(&a[i], &b[i]);
+        }
+        let duration1 = start.elapsed();
+
+        let start = Instant::now();
+        for i in 0..size {
+            result[i] = pitch_trim_module::pitch_trim_bit(sk, &result[i]);
+        }
+        let duration2 = start.elapsed();
+
+        println!(
+            "Gate Operation Time: {:.3?}, Bootstrapping Time: {:.3?}",
+            duration1.as_millis(),
+            duration2.as_millis()
+        );
+        if duration1.as_millis() == 0 {
+            println!(
+                "Bootstrapping / Gate (0): {:.3?}",
+                duration2.as_millis()
+            );
+        }else {
+            println!(
+                "Bootstrapping / Gate: {:.3?}",
+                duration2.as_millis() / duration1.as_millis()
+            );
+        }
+        println!("==========================================\n");
+    }
+    fn e_nand_bench(
+        &self,
+        sk: &ServerKey,
+        a: &[Ciphertext],
+        b: &[Ciphertext],
+        result: &mut [Ciphertext],
+    ) {
+        let size: usize = a.len();
+        println!("====================NAND====================");
+
+        let start = Instant::now();
+        for i in 0..size {
+            result[i] = sk.nand(&a[i], &b[i]);
+            result[i] = pitch_trim_module::pitch_trim_bit(sk, &mut result[i]);
+        }
+        let duration1 = start.elapsed();
+
+        let start = Instant::now();
+        for i in 0..size {
+            result[i] = pitch_trim_module::pitch_trim_bit(sk, &result[i]);
+        }
+        let duration2 = start.elapsed();
+
+        println!(
+            "Gate Operation Time: {:.3?}, Bootstrapping Time: {:.3?}",
+            duration1.as_millis(),
+            duration2.as_millis()
+        );
+        if duration1.as_millis() == 0 {
+            println!(
+                "Bootstrapping / Gate (0): {:.3?}",
+                duration2.as_millis()
+            );
+        }else {
+            println!(
+                "Bootstrapping / Gate: {:.3?}",
+                duration2.as_millis() / duration1.as_millis()
+            );
+        }
+        println!("==========================================\n");
+    }
+
+    fn e_nor_bench(
+        &self,
+        sk: &ServerKey,
+        a: &[Ciphertext],
+        b: &[Ciphertext],
+        result: &mut [Ciphertext],
+    ) {
+        let size: usize = a.len();
+        println!("====================NOR====================");
+
+        let start = Instant::now();
+        for i in 0..size {
+            result[i] = sk.nor(&a[i], &b[i]);
+        }
+
+        let duration1 = start.elapsed();
+
+        let start = Instant::now();
+        for i in 0..size {
+            result[i] = pitch_trim_module::pitch_trim_bit(sk, &result[i]);
+        }
+        let duration2 = start.elapsed();
+
+        println!(
+            "Gate Operation Time: {:.3?}, Bootstrapping Time: {:.3?}",
+            duration1.as_millis(),
+            duration2.as_millis()
+        );
+        if duration1.as_millis() == 0 {
+            println!(
+                "Bootstrapping / Gate (0): {:.3?}",
+                duration2.as_millis()
+            );
+        }else {
+            println!(
+                "Bootstrapping / Gate: {:.3?}",
+                duration2.as_millis() / duration1.as_millis()
+            );
+        }
+        println!("==========================================\n");
+    }
+
+    fn e_xnor_bench(
+        &self,
+        sk: &ServerKey,
+        a: &[Ciphertext],
+        b: &[Ciphertext],
+        result: &mut [Ciphertext],
+    ) {
+        let size: usize = a.len();
+        println!("====================XNOR====================");
+
+        let start = Instant::now();
+        for i in 0..size {
+            result[i] = sk.xnor(&a[i], &b[i]);
+        }
+        let duration1 = start.elapsed();
+
+        let start = Instant::now();
+        for i in 0..size {
+            result[i] = pitch_trim_module::pitch_trim_bit(sk, &result[i]);
+        }
+        let duration2 = start.elapsed();
+
+        println!(
+            "Gate Operation Time: {:.3?}, Bootstrapping Time: {:.3?}",
+            duration1.as_millis(),
+            duration2.as_millis()
+        );
+        if duration1.as_millis() == 0 {
+            println!(
+                "Bootstrapping / Gate (0): {:.3?}",
+                duration2.as_millis()
+            );
+        }else {
+            println!(
+                "Bootstrapping / Gate: {:.3?}",
+                duration2.as_millis() / duration1.as_millis()
+            );
+        }
+        println!("==========================================\n");
+    }
+
+
+
+    fn e_and_bench_nobootstrapping(
+        &self,
+        sk: &ServerKey,
+        a: &[Ciphertext],
+        b: &[Ciphertext],
+        result: &mut [Ciphertext],
+    ) {
+        let size: usize = a.len();
+
+        println!("====================AND====================");
+        let start = Instant::now();
+        for i in 0..size {
+            result[i] = sk.and(&a[i], &b[i]);
+        }
+        let duration1 = start.elapsed();
+
+        println!(
+            "Gate Operation Time: {:.3?}",
+            duration1,
+        );
+        println!("==========================================\n");
+    }
+    fn e_or_bench_nobootstrapping(
+        &self,
+        sk: &ServerKey,
+        a: &[Ciphertext],
+        b: &[Ciphertext],
+        result: &mut [Ciphertext],
+    ) {
+        let size: usize = a.len();
+        println!("====================OR====================");
+        let start = Instant::now();
+        for i in 0..size {
+            result[i] = sk.or(&a[i], &b[i]);
+        }
+        let duration1 = start.elapsed();
+
+        println!(
+            "Gate Operation Time: {:.3?}",
+            duration1,
+        );
+        
+        println!("==========================================\n");
+    }
+    fn e_xor_bench_nobootstrapping(
+        &self,
+        sk: &ServerKey,
+        a: &[Ciphertext],
+        b: &[Ciphertext],
+        result: &mut [Ciphertext],
+    ) {
+        let size: usize = a.len();
+        println!("====================XOR====================");
+        let start = Instant::now();
+
+        for i in 0..size {
+            result[i] = sk.xor(&a[i], &b[i]);
+        }
+        let duration1 = start.elapsed();
+
+        println!(
+            "Gate Operation Time: {:.3?}",
+            duration1,
+        );
+        println!("==========================================\n");
+    }
+    fn e_nand_bench_nobootstrapping(
+        &self,
+        sk: &ServerKey,
+        a: &[Ciphertext],
+        b: &[Ciphertext],
+        result: &mut [Ciphertext],
+    ) {
+        let size: usize = a.len();
+        println!("====================NAND====================");
+
+        let start = Instant::now();
+        for i in 0..size {
+            result[i] = sk.nand(&a[i], &b[i]);
+            result[i] = pitch_trim_module::pitch_trim_bit(sk, &mut result[i]);
+        }
+        let duration1 = start.elapsed();
+
+        println!(
+            "Gate Operation Time: {:.3?}",
+            duration1,
+        );
+        println!("==========================================\n");
+    }
+
+    fn e_nor_bench_nobootstrapping(
+        &self,
+        sk: &ServerKey,
+        a: &[Ciphertext],
+        b: &[Ciphertext],
+        result: &mut [Ciphertext],
+    ) {
+        let size: usize = a.len();
+        println!("====================NOR====================");
+
+        let start = Instant::now();
+        for i in 0..size {
+            result[i] = sk.nor(&a[i], &b[i]);
+        }
+
+        let duration1 = start.elapsed();
+
+        println!(
+            "Gate Operation Time: {:.3?}",
+            duration1,
+        );
+        println!("==========================================\n");
+    }
+
+    fn e_xnor_bench_nobootstrapping(
+        &self,
+        sk: &ServerKey,
+        a: &[Ciphertext],
+        b: &[Ciphertext],
+        result: &mut [Ciphertext],
+    ) {
+        let size: usize = a.len();
+        println!("====================XNOR====================");
+
+        let start = Instant::now();
+        for i in 0..size {
+            result[i] = sk.xnor(&a[i], &b[i]);
+        }
+        let duration1 = start.elapsed();
+
+        println!(
+            "Gate Operation Time: {:.3?}",
+            duration1,
+        );
+        println!("==========================================\n");
+    }
 }
 
 impl ProcessorGate for ProcessorBoolean {
-
     fn e_and(&self, sk: &ServerKey, a: &[Ciphertext], b: &[Ciphertext], result: &mut [Ciphertext]) {
         let size: usize = a.len();
 
         for i in 0..size {
-            result[i] =  sk.and(&a[i], &b[i]);
+            result[i] = sk.and(&a[i], &b[i]);
             result[i] = pitch_trim_module::pitch_trim_bit(sk, &result[i]);
         }
 
@@ -1007,10 +1388,8 @@ impl ProcessorGate for ProcessorBoolean {
             result[i] = sk.mux(&selector[i], &ct_then[i], &ct_else[i]);
         }
     }
-
 }
 impl ProcessorCircuits for ProcessorBoolean {
-
     fn e_shl(&self, a: &[Ciphertext], shift_amt: usize, result: &mut [Ciphertext]) {
         // Arithmetic shift left (same as logical shift left)
         let mut a = a.to_vec();
@@ -1798,6 +2177,4 @@ impl ProcessorCircuits for ProcessorBoolean {
             r.clone_from(q);
         }
     }
-
-
 }

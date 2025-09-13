@@ -8,17 +8,19 @@ use tfhe::boolean::prelude::*;
 pub struct RegisterElement {
     pub dst: String,      // destination register
     pub waiting_for: String, // waiting_for which reservation station
-    pub ctxt: Ciphertext, // The result ciphertext from a reservation station or a load instruction
+    pub vec_ctxt: Option<Vec<Ciphertext>>, // The result ciphertext from a reservation station or a load instruction
+    pub bit_ctxt: Option<Ciphertext>,
     pub bootstrap: bool,  // Bootstrap? 1: yes - cannot be used, 0: no - can be used
     pub priority: u32,    // priority
 }
 
 impl RegisterElement {
-    pub fn new(dst: String, waiting_for: String, ctxt: Ciphertext, bootstrap: bool, priority: u32) -> Self {
+    pub fn new(dst: String, waiting_for: String, vec_ctxt: Option<Vec<Ciphertext>>, bit_ctxt: Option<Ciphertext>, bootstrap: bool, priority: u32) -> Self {
         RegisterElement {
             dst,
             waiting_for,
-            ctxt,
+            vec_ctxt,
+            bit_ctxt,
             bootstrap,
             priority,
         }
@@ -27,8 +29,11 @@ impl RegisterElement {
 
 // Trait for subscribers (equivalent to interface)
 pub trait Subscriber {
+    fn decode(&self, code:u8, index:usize, dst:String);
     fn update(&mut self, reg_elmnt: RegisterElement);
     fn add(&mut self, reg_elmnt: RegisterElement);
+    fn fetch(&self, dst:String);
+    fn remove(&mut self, dst:String);
 }
 
 // Publisher struct implementing the Observer pattern
@@ -48,8 +53,9 @@ impl RegisterTable {
 
     // Add a new object
     pub fn add_element(&mut self, element: RegisterElement) {
+        let dst = element.dst.clone();
         self.reg_elements.push(element);
-        self.notify();
+        self.notify(1, self.reg_elements.len()-1, dst);
     }
 
     // Remove an object by index
@@ -58,7 +64,7 @@ impl RegisterTable {
             return false;
         }
         self.reg_elements.remove(index);
-        self.notify();
+        self.notify(2, index, "-".parse().unwrap());
         true
     }
 
@@ -67,8 +73,9 @@ impl RegisterTable {
         if index >= self.reg_elements.len() {
             return false;
         }
+        let dst = element.dst.clone();
         self.reg_elements[index] = element;
-        self.notify();
+        self.notify(3, index, dst);
         true
     }
 
@@ -76,23 +83,23 @@ impl RegisterTable {
         for (i, e) in self.reg_elements.iter().enumerate() {
             if e.dst == dst {
                 self.reg_elements.remove(i);
-                self.notify();
+                self.notify(4, i, dst);
                 return true;
             }
         }
         false
     }
 
-    // Update an object at a specific index
+    // Update an object at a specific destination
     pub fn update_element_dst(&mut self, element: RegisterElement) -> bool {
         let current_dst: String = element.dst.clone();
         for (i, e) in self.reg_elements.iter().enumerate() {
             if e.dst == current_dst {
                 self.reg_elements[i].dst = element.dst.clone();
-                self.reg_elements[i].ctxt = element.ctxt.clone();
+                self.reg_elements[i].vec_ctxt = element.vec_ctxt.clone();
                 self.reg_elements[i].bootstrap = element.bootstrap.clone();
                 self.reg_elements[i].priority = element.priority.clone();
-                self.notify();
+                self.notify(5, i, current_dst);
                 return true;
             }
         }
@@ -124,7 +131,7 @@ impl RegisterTable {
         for (i, e) in self.reg_elements.iter().enumerate() {
             println!(
                 "|{} || {:<4} | {:<4} | {:?} | {:<4} | {:<4}|",
-                i, e.dst, e.waiting_for, e.ctxt, e.bootstrap, e.priority
+                i, e.dst, e.waiting_for, e.vec_ctxt, e.bootstrap, e.priority
             );
         }
         println!("=============================================");
@@ -141,7 +148,7 @@ impl RegisterTable {
     }
 
     // Notify all subscribers of changes
-    fn notify(&self) {
+    fn notify(&self, code: u8, indx: usize, dst: String) {
         // Clean up any weak references that no longer exist
         let subscribers: Vec<_> = self
             .subscribers
@@ -152,7 +159,7 @@ impl RegisterTable {
         for subscriber in subscribers {
             if let Ok(mut sub) = subscriber.try_borrow_mut() {
                 for element in &self.reg_elements {
-                    sub.update(element.clone());
+                    sub.decode(code, indx, dst.clone());
                 }
             }
         }

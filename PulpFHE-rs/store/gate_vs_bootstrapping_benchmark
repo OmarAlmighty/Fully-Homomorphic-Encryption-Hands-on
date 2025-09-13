@@ -1,0 +1,188 @@
+RUN 1 - 8 bits:
+    ====================AND====================
+    Gate Operation Time: 0, Bootstrapping Time: 17395
+    Bootstrapping / Gate (0): 17395
+    ==========================================
+
+    ====================OR====================
+    Gate Operation Time: 0, Bootstrapping Time: 17345
+    Bootstrapping / Gate (0): 17345
+    ==========================================
+
+    ====================XOR====================
+    Gate Operation Time: 0, Bootstrapping Time: 17391
+    Bootstrapping / Gate (0): 17391
+    ==========================================
+
+    ====================NAND====================
+    Gate Operation Time: 17557, Bootstrapping Time: 17448
+    Bootstrapping / Gate: 0
+    ==========================================
+
+    ====================NOR====================
+    Gate Operation Time: 0, Bootstrapping Time: 17527
+    Bootstrapping / Gate (0): 17527
+    ==========================================
+
+    ====================XNOR====================
+    Gate Operation Time: 0, Bootstrapping Time: 17493
+    Bootstrapping / Gate (0): 17493
+    ==========================================
+
+
+RUN 2 - 8 bits:
+    ====================AND====================
+    Gate Operation Time: 0, Bootstrapping Time: 13895
+    Bootstrapping / Gate (0): 13895
+    ==========================================
+
+    ====================OR====================
+    Gate Operation Time: 0, Bootstrapping Time: 14244
+    Bootstrapping / Gate (0): 14244
+    ==========================================
+
+    ====================XOR====================
+    Gate Operation Time: 0, Bootstrapping Time: 14392
+    Bootstrapping / Gate (0): 14392
+    ==========================================
+
+    ====================NAND====================
+    Gate Operation Time: 17338, Bootstrapping Time: 17530
+    Bootstrapping / Gate: 1
+    ==========================================
+
+    ====================NOR====================
+    Gate Operation Time: 0, Bootstrapping Time: 17429
+    Bootstrapping / Gate (0): 17429
+    ==========================================
+
+    ====================XNOR====================
+    Gate Operation Time: 0, Bootstrapping Time: 18961
+    Bootstrapping / Gate (0): 18961
+    ==========================================
+
+
+RUN1 - 16 bits:
+    ====================AND====================
+    Gate Operation Time: 0, Bootstrapping Time: 38751
+    Bootstrapping / Gate (0): 38751
+    ==========================================
+
+    ====================OR====================
+    Gate Operation Time: 0, Bootstrapping Time: 39134
+    Bootstrapping / Gate (0): 39134
+    ==========================================
+
+    ====================XOR====================
+    Gate Operation Time: 0, Bootstrapping Time: 35213
+    Bootstrapping / Gate (0): 35213
+    ==========================================
+
+    ====================NAND====================
+    Gate Operation Time: 34810, Bootstrapping Time: 35334
+    Bootstrapping / Gate: 1
+    ==========================================
+
+    ====================NOR====================
+    Gate Operation Time: 0, Bootstrapping Time: 35453
+    Bootstrapping / Gate (0): 35453
+    ==========================================
+
+    ====================XNOR====================
+    Gate Operation Time: 0, Bootstrapping Time: 35221
+    Bootstrapping / Gate (0): 35221
+    ==========================================
+
+RUN 2 - 16 bits:
+    ====================AND====================
+    Gate Operation Time: 0, Bootstrapping Time: 28260
+    Bootstrapping / Gate (0): 28260
+    ==========================================
+
+    ====================OR====================
+    Gate Operation Time: 0, Bootstrapping Time: 31753
+    Bootstrapping / Gate (0): 31753
+    ==========================================
+
+    ====================XOR====================
+    Gate Operation Time: 0, Bootstrapping Time: 35570
+    Bootstrapping / Gate (0): 35570
+    ==========================================
+
+    ====================NAND====================
+    Gate Operation Time: 35305, Bootstrapping Time: 35270
+    Bootstrapping / Gate: 0
+    ==========================================
+
+    ====================NOR====================
+    Gate Operation Time: 0, Bootstrapping Time: 37564
+    Bootstrapping / Gate (0): 37564
+    ==========================================
+
+    ====================XNOR====================
+    Gate Operation Time: 0, Bootstrapping Time: 35681
+    Bootstrapping / Gate (0): 35681
+    ==========================================
+
+
+RUN 1 - 32 bits:
+    ====================AND====================
+    Gate Operation Time: 0, Bootstrapping Time: 68615
+    Bootstrapping / Gate (0): 68615
+    ==========================================
+
+    ====================OR====================
+    Gate Operation Time: 0, Bootstrapping Time: 76214
+    Bootstrapping / Gate (0): 76214
+    ==========================================
+
+    ====================XOR====================
+    Gate Operation Time: 0, Bootstrapping Time: 75344
+    Bootstrapping / Gate (0): 75344
+    ==========================================
+
+    ====================NAND====================
+    Gate Operation Time: 76229, Bootstrapping Time: 76342
+    Bootstrapping / Gate: 1
+    ==========================================
+
+    ====================NOR====================
+    Gate Operation Time: 0, Bootstrapping Time: 75906
+    Bootstrapping / Gate (0): 75906
+    ==========================================
+
+    ====================XNOR====================
+    Gate Operation Time: 1, Bootstrapping Time: 76772
+    Bootstrapping / Gate: 76772
+    ==========================================
+
+RUN 2 - 32 bits:
+    ====================AND====================
+    Gate Operation Time: 0, Bootstrapping Time: 59407
+    Bootstrapping / Gate (0): 59407
+    ==========================================
+
+    ====================OR====================
+    Gate Operation Time: 0, Bootstrapping Time: 70550
+    Bootstrapping / Gate (0): 70550
+    ==========================================
+
+    ====================XOR====================
+    Gate Operation Time: 0, Bootstrapping Time: 70150
+    Bootstrapping / Gate (0): 70150
+    ==========================================
+
+    ====================NAND====================
+    Gate Operation Time: 70372, Bootstrapping Time: 70546
+    Bootstrapping / Gate: 1
+    ==========================================
+
+    ====================NOR====================
+    Gate Operation Time: 0, Bootstrapping Time: 69099
+    Bootstrapping / Gate (0): 69099
+    ==========================================
+
+    ====================XNOR====================
+    Gate Operation Time: 0, Bootstrapping Time: 68247
+    Bootstrapping / Gate (0): 68247
+    ==========================================

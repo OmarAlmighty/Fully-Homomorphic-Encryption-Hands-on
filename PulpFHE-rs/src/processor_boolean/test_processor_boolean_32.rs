@@ -99,6 +99,111 @@ fn test_encrypt_decrypt() {
 
 #[test]
 #[serial]
+fn test_gate_bootstrap_cycles() {
+    println!("Measuring the time difference between gate bootstrapping and gate evaluation");
+    println!("[*] All times are in milliseconds");
+
+    let (client_key, server_key) = gen_keys();
+
+    let server = ProcessorBoolean;
+    let mut rng = rand::thread_rng();
+
+    // Define two numbers and convert them to signed 8-bit representation.
+    let a: i32 = rng.gen_range(-50..50);
+    let b: i32 = rng.gen_range(-50..50);
+
+    let ct_a = encode_encrypt(a, 32, &client_key);
+    let ct_b = encode_encrypt(b, 32, &client_key);
+    let mut ct_result1: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); ct_a.len()];
+    let mut ct_result2: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); ct_a.len()];
+    let mut ct_result3: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); ct_a.len()];
+    let mut ct_result4: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); ct_a.len()];
+    let mut ct_result5: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); ct_a.len()];
+    let mut ct_result6: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); ct_a.len()];
+
+
+    server.e_and_bench(&server_key, &ct_a, &ct_b, &mut ct_result1);
+    server.e_or_bench(&server_key, &ct_a, &ct_b, &mut ct_result2);
+    server.e_xor_bench(&server_key, &ct_a, &ct_b, &mut ct_result3);
+    server.e_nand_bench(&server_key, &ct_a, &ct_b, &mut ct_result4);
+    server.e_nor_bench(&server_key, &ct_a, &ct_b, &mut ct_result5);
+    server.e_xnor_bench(&server_key, &ct_a, &ct_b, &mut ct_result6);
+
+
+
+    let dec_res = decrypt_decode(&ct_result1, &client_key);
+    assert_eq!(dec_res, (a & b));
+
+    let dec_res = decrypt_decode(&ct_result2, &client_key);
+    assert_eq!(dec_res, (a | b));
+
+    let dec_res = decrypt_decode(&ct_result3, &client_key);
+    assert_eq!(dec_res, (a ^ b));
+
+    let dec_res = decrypt_decode(&ct_result4, &client_key);
+    assert_eq!(dec_res, !(a & b));
+
+    let dec_res = decrypt_decode(&ct_result5, &client_key);
+    assert_eq!(dec_res, !(a | b));
+
+    let dec_res = decrypt_decode(&ct_result6, &client_key);
+    assert_eq!(dec_res, !(a ^ b));
+}
+
+#[test]
+#[serial]
+fn test_gate_cycles_nobootstrapping() {
+    println!("Measuring the time difference between gate bootstrapping and gate evaluation");
+    println!("[*] All times are in milliseconds");
+
+    let (client_key, server_key) = gen_keys();
+
+    let server = ProcessorBoolean;
+    let mut rng = rand::thread_rng();
+
+    // Define two numbers and convert them to signed 8-bit representation.
+    let a: i32 = rng.gen_range(-50..50);
+    let b: i32 = rng.gen_range(-50..50);
+
+    let ct_a = encode_encrypt(a, 32, &client_key);
+    let ct_b = encode_encrypt(b, 32, &client_key);
+    let mut ct_result1: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); ct_a.len()];
+    let mut ct_result2: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); ct_a.len()];
+    let mut ct_result3: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); ct_a.len()];
+    let mut ct_result4: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); ct_a.len()];
+    let mut ct_result5: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); ct_a.len()];
+    let mut ct_result6: Vec<Ciphertext> = vec![Ciphertext::Trivial(false); ct_a.len()];
+
+
+    server.e_and_bench_nobootstrapping(&server_key, &ct_a, &ct_b, &mut ct_result1);
+    server.e_or_bench_nobootstrapping(&server_key, &ct_a, &ct_b, &mut ct_result2);
+    server.e_xor_bench_nobootstrapping(&server_key, &ct_a, &ct_b, &mut ct_result3);
+    server.e_nand_bench_nobootstrapping(&server_key, &ct_a, &ct_b, &mut ct_result4);
+    server.e_nor_bench_nobootstrapping(&server_key, &ct_a, &ct_b, &mut ct_result5);
+    server.e_xnor_bench_nobootstrapping(&server_key, &ct_a, &ct_b, &mut ct_result6);
+
+
+    let dec_res = decrypt_decode(&ct_result1, &client_key);
+    assert_eq!(dec_res, (a & b));
+
+    let dec_res = decrypt_decode(&ct_result2, &client_key);
+    assert_eq!(dec_res, (a | b));
+
+    let dec_res = decrypt_decode(&ct_result3, &client_key);
+    assert_eq!(dec_res, (a ^ b));
+
+    let dec_res = decrypt_decode(&ct_result4, &client_key);
+    assert_eq!(dec_res, !(a & b));
+
+    let dec_res = decrypt_decode(&ct_result5, &client_key);
+    assert_eq!(dec_res, !(a | b));
+
+    let dec_res = decrypt_decode(&ct_result6, &client_key);
+    assert_eq!(dec_res, !(a ^ b));
+}
+
+#[test]
+#[serial]
 fn test_and() {
     let fn_name = "e_and";
     println!("[*] TEST: {fn_name}");
