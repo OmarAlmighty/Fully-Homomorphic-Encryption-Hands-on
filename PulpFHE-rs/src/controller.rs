@@ -159,12 +159,31 @@ impl Controller {
                             &val2[op1_start_indx as usize],
                         );
                         let rt_entry = self.register_tbl.get_element_dst(dst.to_string());
-                        let mut temp = rt_entry.unwrap().vec_ctxt.clone().unwrap();
-                        for i in 0..result_start_indx + 1 {
-                            result[i as usize] = temp[i as usize].clone();
-                        }
-                        for i in end_indx as usize..temp.len() {
-                            result[i] = temp[i].clone();
+                        match rt_entry {
+                            Some(_value) => {
+                                let mut temp = rt_entry.unwrap().vec_ctxt.clone().unwrap();
+                                temp[result_start_indx as usize] =
+                                    result[result_start_indx as usize].clone();
+                                result = temp.clone();
+                                let updated = RegisterElement::new(
+                                    dst.to_string(),
+                                    "-".to_string(),
+                                    Option::from(result),
+                                    -1,
+                                    1,
+                                );
+                                self.register_tbl.update_element_dst(updated);
+                            }
+                            None => {
+                                let updated = RegisterElement::new(
+                                    dst.to_string(),
+                                    "-".to_string(),
+                                    Option::from(result),
+                                    -1,
+                                    1,
+                                );
+                                self.register_tbl.add_element(updated);
+                            }
                         }
                     }
                 } else if ret_a.unwrap().waiting_for == "-" && ret_b.unwrap().waiting_for != "-" {
@@ -277,12 +296,31 @@ impl Controller {
                             &val2[op1_start_indx as usize],
                         );
                         let rt_entry = self.register_tbl.get_element_dst(dst.to_string());
-                        let mut temp = rt_entry.unwrap().vec_ctxt.clone().unwrap();
-                        for i in 0..result_start_indx + 1 {
-                            result[i as usize] = temp[i as usize].clone();
-                        }
-                        for i in end_indx as usize..temp.len() {
-                            result[i] = temp[i].clone();
+                        match rt_entry {
+                            Some(_value) => {
+                                let mut temp = rt_entry.unwrap().vec_ctxt.clone().unwrap();
+                                temp[result_start_indx as usize] =
+                                    result[result_start_indx as usize].clone();
+                                result = temp.clone();
+                                let updated = RegisterElement::new(
+                                    dst.to_string(),
+                                    "-".to_string(),
+                                    Option::from(result),
+                                    -1,
+                                    1,
+                                );
+                                self.register_tbl.update_element_dst(updated);
+                            }
+                            None => {
+                                let updated = RegisterElement::new(
+                                    dst.to_string(),
+                                    "-".to_string(),
+                                    Option::from(result),
+                                    -1,
+                                    1,
+                                );
+                                self.register_tbl.add_element(updated);
+                            }
                         }
                     }
                 } else if ret_a.unwrap().waiting_for == "-" && ret_b.unwrap().waiting_for != "-" {
@@ -395,12 +433,31 @@ impl Controller {
                             &val2[op1_start_indx as usize],
                         );
                         let rt_entry = self.register_tbl.get_element_dst(dst.to_string());
-                        let mut temp = rt_entry.unwrap().vec_ctxt.clone().unwrap();
-                        for i in 0..result_start_indx + 1 {
-                            result[i as usize] = temp[i as usize].clone();
-                        }
-                        for i in end_indx as usize..temp.len() {
-                            result[i] = temp[i].clone();
+                        match rt_entry {
+                            Some(_value) => {
+                                let mut temp = rt_entry.unwrap().vec_ctxt.clone().unwrap();
+                                temp[result_start_indx as usize] =
+                                    result[result_start_indx as usize].clone();
+                                result = temp.clone();
+                                let updated = RegisterElement::new(
+                                    dst.to_string(),
+                                    "-".to_string(),
+                                    Option::from(result),
+                                    -1,
+                                    1,
+                                );
+                                self.register_tbl.update_element_dst(updated);
+                            }
+                            None => {
+                                let updated = RegisterElement::new(
+                                    dst.to_string(),
+                                    "-".to_string(),
+                                    Option::from(result),
+                                    -1,
+                                    1,
+                                );
+                                self.register_tbl.add_element(updated);
+                            }
                         }
                     }
                 } else if ret_a.unwrap().waiting_for == "-" && ret_b.unwrap().waiting_for != "-" {
@@ -485,7 +542,7 @@ impl Controller {
                         //   3. If no, then add a new entry
                         let rt_entry = self.register_tbl.get_element_dst(dst.to_string());
                         let mut temp = rt_entry.unwrap().vec_ctxt.clone().unwrap();
-                        for i in 0..result_start_indx+1 {
+                        for i in 0..result_start_indx + 1 {
                             result[i as usize] = temp[i as usize].clone();
                         }
                         for i in end_indx as usize..temp.len() {
@@ -513,12 +570,31 @@ impl Controller {
                             &val2[op1_start_indx as usize],
                         );
                         let rt_entry = self.register_tbl.get_element_dst(dst.to_string());
-                        let mut temp = rt_entry.unwrap().vec_ctxt.clone().unwrap();
-                        for i in 0..result_start_indx+1 {
-                            result[i as usize] = temp[i as usize].clone();
-                        }
-                        for i in end_indx as usize..temp.len() {
-                            result[i] = temp[i].clone();
+                        match rt_entry {
+                            Some(_value) => {
+                                let mut temp = rt_entry.unwrap().vec_ctxt.clone().unwrap();
+                                temp[result_start_indx as usize] =
+                                    result[result_start_indx as usize].clone();
+                                result = temp.clone();
+                                let updated = RegisterElement::new(
+                                    dst.to_string(),
+                                    "-".to_string(),
+                                    Option::from(result),
+                                    -1,
+                                    1,
+                                );
+                                self.register_tbl.update_element_dst(updated);
+                            }
+                            None => {
+                                let updated = RegisterElement::new(
+                                    dst.to_string(),
+                                    "-".to_string(),
+                                    Option::from(result),
+                                    -1,
+                                    1,
+                                );
+                                self.register_tbl.add_element(updated);
+                            }
                         }
                     }
                 } else if ret_a.unwrap().waiting_for == "-" && ret_b.unwrap().waiting_for != "-" {
@@ -603,7 +679,7 @@ impl Controller {
                         //   3. If no, then add a new entry
                         let rt_entry = self.register_tbl.get_element_dst(dst.to_string());
                         let mut temp = rt_entry.unwrap().vec_ctxt.clone().unwrap();
-                        for i in 0..result_start_indx+1 {
+                        for i in 0..result_start_indx + 1 {
                             result[i as usize] = temp[i as usize].clone();
                         }
                         for i in end_indx as usize..temp.len() {
@@ -631,12 +707,31 @@ impl Controller {
                             &val2[op1_start_indx as usize],
                         );
                         let rt_entry = self.register_tbl.get_element_dst(dst.to_string());
-                        let mut temp = rt_entry.unwrap().vec_ctxt.clone().unwrap();
-                        for i in 0..result_start_indx+1 {
-                            result[i as usize] = temp[i as usize].clone();
-                        }
-                        for i in end_indx as usize..temp.len() {
-                            result[i] = temp[i].clone();
+                        match rt_entry {
+                            Some(_value) => {
+                                let mut temp = rt_entry.unwrap().vec_ctxt.clone().unwrap();
+                                temp[result_start_indx as usize] =
+                                    result[result_start_indx as usize].clone();
+                                result = temp.clone();
+                                let updated = RegisterElement::new(
+                                    dst.to_string(),
+                                    "-".to_string(),
+                                    Option::from(result),
+                                    -1,
+                                    1,
+                                );
+                                self.register_tbl.update_element_dst(updated);
+                            }
+                            None => {
+                                let updated = RegisterElement::new(
+                                    dst.to_string(),
+                                    "-".to_string(),
+                                    Option::from(result),
+                                    -1,
+                                    1,
+                                );
+                                self.register_tbl.add_element(updated);
+                            }
                         }
                     }
                 } else if ret_a.unwrap().waiting_for == "-" && ret_b.unwrap().waiting_for != "-" {
@@ -721,7 +816,7 @@ impl Controller {
                         //   3. If no, then add a new entry
                         let rt_entry = self.register_tbl.get_element_dst(dst.to_string());
                         let mut temp = rt_entry.unwrap().vec_ctxt.clone().unwrap();
-                        for i in 0..result_start_indx+1 {
+                        for i in 0..result_start_indx + 1 {
                             result[i as usize] = temp[i as usize].clone();
                         }
                         for i in end_indx as usize..temp.len() {
@@ -749,12 +844,31 @@ impl Controller {
                             &val2[op1_start_indx as usize],
                         );
                         let rt_entry = self.register_tbl.get_element_dst(dst.to_string());
-                        let mut temp = rt_entry.unwrap().vec_ctxt.clone().unwrap();
-                        for i in 0..result_start_indx+1 {
-                            result[i as usize] = temp[i as usize].clone();
-                        }
-                        for i in end_indx as usize..temp.len() {
-                            result[i] = temp[i].clone();
+                        match rt_entry {
+                            Some(_value) => {
+                                let mut temp = rt_entry.unwrap().vec_ctxt.clone().unwrap();
+                                temp[result_start_indx as usize] =
+                                    result[result_start_indx as usize].clone();
+                                result = temp.clone();
+                                let updated = RegisterElement::new(
+                                    dst.to_string(),
+                                    "-".to_string(),
+                                    Option::from(result),
+                                    -1,
+                                    1,
+                                );
+                                self.register_tbl.update_element_dst(updated);
+                            }
+                            None => {
+                                let updated = RegisterElement::new(
+                                    dst.to_string(),
+                                    "-".to_string(),
+                                    Option::from(result),
+                                    -1,
+                                    1,
+                                );
+                                self.register_tbl.add_element(updated);
+                            }
                         }
                     }
                 } else if ret_a.unwrap().waiting_for == "-" && ret_b.unwrap().waiting_for != "-" {
