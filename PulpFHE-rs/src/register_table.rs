@@ -6,21 +6,25 @@ use tfhe::boolean::prelude::*;
 // Struct for individual objects
 #[derive(Clone, Debug)]
 pub struct RegisterElement {
-    pub dst: String,      // destination register
-    pub waiting_for: String, // waiting_for which reservation station
+    pub dst: String,                       // destination register
+    pub waiting_for: String,               // waiting_for which reservation station
     pub vec_ctxt: Option<Vec<Ciphertext>>, // The result ciphertext from a reservation station or a load instruction
-    pub bit_ctxt: Option<Ciphertext>,
-    pub bootstrap: bool,  // Bootstrap? 1: yes - cannot be used, 0: no - can be used
-    pub priority: u32,    // priority
+    pub bootstrap: i8, // Bootstrap? -2 --> no bootstrapping  • -1 --> bootstrap all of the bits 0…32 --> bootstrap bits at specific index
+    pub priority: u32, // priority
 }
 
 impl RegisterElement {
-    pub fn new(dst: String, waiting_for: String, vec_ctxt: Option<Vec<Ciphertext>>, bit_ctxt: Option<Ciphertext>, bootstrap: bool, priority: u32) -> Self {
+    pub fn new(
+        dst: String,
+        waiting_for: String,
+        vec_ctxt: Option<Vec<Ciphertext>>,
+        bootstrap: i8,
+        priority: u32,
+    ) -> Self {
         RegisterElement {
             dst,
             waiting_for,
             vec_ctxt,
-            bit_ctxt,
             bootstrap,
             priority,
         }
@@ -29,11 +33,11 @@ impl RegisterElement {
 
 // Trait for subscribers (equivalent to interface)
 pub trait Subscriber {
-    fn decode(&self, code:u8, index:usize, dst:String);
+    fn decode(&self, code: u8, index: usize, dst: String);
     fn update(&mut self, reg_elmnt: RegisterElement);
     fn add(&mut self, reg_elmnt: RegisterElement);
-    fn fetch(&self, dst:String);
-    fn remove(&mut self, dst:String);
+    fn fetch(&self, dst: String);
+    fn remove(&mut self, dst: String);
 }
 
 // Publisher struct implementing the Observer pattern
@@ -55,7 +59,7 @@ impl RegisterTable {
     pub fn add_element(&mut self, element: RegisterElement) {
         let dst = element.dst.clone();
         self.reg_elements.push(element);
-        self.notify(1, self.reg_elements.len()-1, dst);
+        self.notify(1, self.reg_elements.len() - 1, dst);
     }
 
     // Remove an object by index

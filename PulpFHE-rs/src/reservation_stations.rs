@@ -33,10 +33,10 @@ impl RsEntry {
         }
     }
 }
-pub struct AND_rs {
+pub struct AndRs {
     entries: Vec<RsEntry>,
 }
-impl AND_rs {
+impl AndRs {
     pub fn new() -> Self {
         Self {
             entries: Vec::new(),
@@ -55,34 +55,11 @@ impl AND_rs {
         self.entries.push(entry);
     }
 }
-pub struct OR_rs {
-    entries: Vec<RsEntry>,
-}
-
-impl OR_rs {
-    pub fn new() -> Self {
-        Self {
-            entries: Vec::new(),
-        }
-    }
-    pub fn add_entry(
-        &mut self,
-        id: String,
-        rs1: String,
-        rs2: String,
-        val1: Option<Vec<Ciphertext>>,
-        val2: Option<Vec<Ciphertext>>,
-        dst: String,
-    ) {
-        let entry = RsEntry::new(id, true, rs1, rs2, val1, val2, dst);
-        self.entries.push(entry);
-    }
-}
-pub struct XOR_rs {
+pub struct OrRs {
     entries: Vec<RsEntry>,
 }
 
-impl XOR_rs {
+impl OrRs {
     pub fn new() -> Self {
         Self {
             entries: Vec::new(),
@@ -101,33 +78,11 @@ impl XOR_rs {
         self.entries.push(entry);
     }
 }
-pub struct NAND_rs {
-    entries: Vec<RsEntry>,
-}
-impl NAND_rs {
-    pub fn new() -> Self {
-        Self {
-            entries: Vec::new(),
-        }
-    }
-    pub fn add_entry(
-        &mut self,
-        id: String,
-        rs1: String,
-        rs2: String,
-        val1: Option<Vec<Ciphertext>>,
-        val2: Option<Vec<Ciphertext>>,
-        dst: String,
-    ) {
-        let entry = RsEntry::new(id, true, rs1, rs2, val1, val2, dst);
-        self.entries.push(entry);
-    }
-}
-pub struct NOR_rs {
+pub struct XorRs {
     entries: Vec<RsEntry>,
 }
 
-impl NOR_rs {
+impl XorRs {
     pub fn new() -> Self {
         Self {
             entries: Vec::new(),
@@ -146,12 +101,33 @@ impl NOR_rs {
         self.entries.push(entry);
     }
 }
-
-pub struct XNOR_rs {
+pub struct NandRs {
+    entries: Vec<RsEntry>,
+}
+impl NandRs {
+    pub fn new() -> Self {
+        Self {
+            entries: Vec::new(),
+        }
+    }
+    pub fn add_entry(
+        &mut self,
+        id: String,
+        rs1: String,
+        rs2: String,
+        val1: Option<Vec<Ciphertext>>,
+        val2: Option<Vec<Ciphertext>>,
+        dst: String,
+    ) {
+        let entry = RsEntry::new(id, true, rs1, rs2, val1, val2, dst);
+        self.entries.push(entry);
+    }
+}
+pub struct NorRs {
     entries: Vec<RsEntry>,
 }
 
-impl XNOR_rs {
+impl NorRs {
     pub fn new() -> Self {
         Self {
             entries: Vec::new(),
@@ -170,7 +146,31 @@ impl XNOR_rs {
         self.entries.push(entry);
     }
 }
-impl Subscriber for AND_rs {
+
+pub struct XnorRs {
+    entries: Vec<RsEntry>,
+}
+
+impl XnorRs {
+    pub fn new() -> Self {
+        Self {
+            entries: Vec::new(),
+        }
+    }
+    pub fn add_entry(
+        &mut self,
+        id: String,
+        rs1: String,
+        rs2: String,
+        val1: Option<Vec<Ciphertext>>,
+        val2: Option<Vec<Ciphertext>>,
+        dst: String,
+    ) {
+        let entry = RsEntry::new(id, true, rs1, rs2, val1, val2, dst);
+        self.entries.push(entry);
+    }
+}
+impl Subscriber for AndRs {
     fn decode(&self, code: u8, index: usize, dst: String) {
         // code = 1 --> a new element is added to the register table
         if code == 1 {
@@ -196,22 +196,11 @@ impl Subscriber for AND_rs {
     }
 
     fn update(&mut self, element: RegisterElement) {
-        if element.dst == self.dst {
-            //let new_element: RegisterElement = RegisterElement::new(self.dst, self.id, self.)
-        }
-        if element.dst == self.rs1 {
-            self.val1 = element.vec_ctxt;
-        } else if element.dst == self.rs2 {
-            self.val2 = element.vec_ctxt;
-        }
+        println!("This subscriber's update function is called.")
     }
 
     fn add(&mut self, reg_elmnt: RegisterElement) {
-        if reg_elmnt.dst == self.rs1 {
-            self.val1 = reg_elmnt.vec_ctxt;
-        } else if reg_elmnt.dst == self.rs2 {
-            self.val2 = reg_elmnt.vec_ctxt;
-        }
+        println!("This subscriber's add function is called.")
     }
 
     fn fetch(&self, dst: String) {

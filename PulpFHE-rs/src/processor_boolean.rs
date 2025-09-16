@@ -13,7 +13,7 @@
 //! homomorphically.
 //!
 
-use crate::pitch_trim_module::pitch_trim_module;
+use crate::pitch_trim_module::PitchTrimModule;
 use crate::processor_circuits::ProcessorCircuits;
 use crate::processor_gates::ProcessorGate;
 use std::process::exit;
@@ -29,6 +29,9 @@ mod test_processor_boolean_8;
 pub struct ProcessorBoolean;
 use std::time::{Duration, Instant};
 impl ProcessorBoolean {
+    pub fn new() -> Self {
+        ProcessorBoolean
+    }
     /// A helper function for performing division and modulo operations.
     fn e_shl_p(&self, a: &[Ciphertext], LSB: &Ciphertext, result: &mut [Ciphertext]) {
         for i in 1..a.len() {
@@ -526,7 +529,7 @@ impl ProcessorBoolean {
 
         let start = Instant::now();
         for i in 0..size {
-            result[i] = pitch_trim_module::pitch_trim_bit(sk, &result[i]);
+            result[i] = PitchTrimModule::pitch_trim_bit(sk, &result[i]);
         }
         let duration2 = start.elapsed();
 
@@ -565,7 +568,7 @@ impl ProcessorBoolean {
 
         let start = Instant::now();
         for i in 0..size {
-            result[i] = pitch_trim_module::pitch_trim_bit(sk, &result[i]);
+            result[i] = PitchTrimModule::pitch_trim_bit(sk, &result[i]);
         }
         let duration2 = start.elapsed();
 
@@ -605,7 +608,7 @@ impl ProcessorBoolean {
 
         let start = Instant::now();
         for i in 0..size {
-            result[i] = pitch_trim_module::pitch_trim_bit(sk, &result[i]);
+            result[i] = PitchTrimModule::pitch_trim_bit(sk, &result[i]);
         }
         let duration2 = start.elapsed();
 
@@ -640,13 +643,13 @@ impl ProcessorBoolean {
         let start = Instant::now();
         for i in 0..size {
             result[i] = sk.nand(&a[i], &b[i]);
-            result[i] = pitch_trim_module::pitch_trim_bit(sk, &mut result[i]);
+            result[i] = PitchTrimModule::pitch_trim_bit(sk, &mut result[i]);
         }
         let duration1 = start.elapsed();
 
         let start = Instant::now();
         for i in 0..size {
-            result[i] = pitch_trim_module::pitch_trim_bit(sk, &result[i]);
+            result[i] = PitchTrimModule::pitch_trim_bit(sk, &result[i]);
         }
         let duration2 = start.elapsed();
 
@@ -688,7 +691,7 @@ impl ProcessorBoolean {
 
         let start = Instant::now();
         for i in 0..size {
-            result[i] = pitch_trim_module::pitch_trim_bit(sk, &result[i]);
+            result[i] = PitchTrimModule::pitch_trim_bit(sk, &result[i]);
         }
         let duration2 = start.elapsed();
 
@@ -729,7 +732,7 @@ impl ProcessorBoolean {
 
         let start = Instant::now();
         for i in 0..size {
-            result[i] = pitch_trim_module::pitch_trim_bit(sk, &result[i]);
+            result[i] = PitchTrimModule::pitch_trim_bit(sk, &result[i]);
         }
         let duration2 = start.elapsed();
 
@@ -833,7 +836,7 @@ impl ProcessorBoolean {
         let start = Instant::now();
         for i in 0..size {
             result[i] = sk.nand(&a[i], &b[i]);
-            result[i] = pitch_trim_module::pitch_trim_bit(sk, &mut result[i]);
+            result[i] = PitchTrimModule::pitch_trim_bit(sk, &mut result[i]);
         }
         let duration1 = start.elapsed();
 
@@ -898,7 +901,7 @@ impl ProcessorGate for ProcessorBoolean {
 
         for i in 0..size {
             result[i] = sk.and(&a[i], &b[i]);
-            result[i] = pitch_trim_module::pitch_trim_bit(sk, &result[i]);
+            result[i] = PitchTrimModule::pitch_trim_bit(sk, &result[i]);
         }
 
         // #[cfg(debug_assertions)]
@@ -909,7 +912,7 @@ impl ProcessorGate for ProcessorBoolean {
 
     fn e_and_bit(&self, sk: &ServerKey, a: &Ciphertext, b: &Ciphertext) -> Ciphertext {
         let mut result: Ciphertext = sk.and(a, b);
-        result = pitch_trim_module::pitch_trim_bit(sk, &mut result);
+        result = PitchTrimModule::pitch_trim_bit(sk, &mut result);
 
         // #[cfg(debug_assertions)]
         // {
@@ -936,7 +939,7 @@ impl ProcessorGate for ProcessorBoolean {
 
         for i in index_low..index_high {
             result[i] = sk.and(&a[i], &b[i]);
-            result[i] = pitch_trim_module::pitch_trim_bit(sk, &mut result[i]);
+            result[i] = PitchTrimModule::pitch_trim_bit(sk, &mut result[i]);
         }
 
         // #[cfg(debug_assertions)]
@@ -964,7 +967,7 @@ impl ProcessorGate for ProcessorBoolean {
         let size: usize = a.len();
         for i in 0..size {
             result[i] = sk.or(&a[i], &b[i]);
-            result[i] = pitch_trim_module::pitch_trim_bit(sk, &mut result[i]);
+            result[i] = PitchTrimModule::pitch_trim_bit(sk, &mut result[i]);
         }
 
         // #[cfg(debug_assertions)]
@@ -975,7 +978,7 @@ impl ProcessorGate for ProcessorBoolean {
 
     fn e_or_bit(&self, sk: &ServerKey, a: &Ciphertext, b: &Ciphertext) -> Ciphertext {
         let mut result: Ciphertext = sk.or(a, b);
-        result = pitch_trim_module::pitch_trim_bit(sk, &mut result);
+        result = PitchTrimModule::pitch_trim_bit(sk, &mut result);
 
         // #[cfg(debug_assertions)]
         // {
@@ -1002,7 +1005,7 @@ impl ProcessorGate for ProcessorBoolean {
 
         for i in index_low..index_high {
             result[i] = sk.or(&a[i], &b[i]);
-            result[i] = pitch_trim_module::pitch_trim_bit(sk, &mut result[i]);
+            result[i] = PitchTrimModule::pitch_trim_bit(sk, &mut result[i]);
         }
 
         // #[cfg(debug_assertions)]
@@ -1030,7 +1033,7 @@ impl ProcessorGate for ProcessorBoolean {
         let size: usize = a.len();
         for i in 0..size {
             result[i] = sk.xor(&a[i], &b[i]);
-            result[i] = pitch_trim_module::pitch_trim_bit(sk, &mut result[i]);
+            result[i] = PitchTrimModule::pitch_trim_bit(sk, &mut result[i]);
         }
 
         // #[cfg(debug_assertions)]
@@ -1041,7 +1044,7 @@ impl ProcessorGate for ProcessorBoolean {
 
     fn e_xor_bit(&self, sk: &ServerKey, a: &Ciphertext, b: &Ciphertext) -> Ciphertext {
         let mut result: Ciphertext = sk.xor(a, b);
-        result = pitch_trim_module::pitch_trim_bit(sk, &mut result);
+        result = PitchTrimModule::pitch_trim_bit(sk, &mut result);
 
         // #[cfg(debug_assertions)]
         // {
@@ -1068,7 +1071,7 @@ impl ProcessorGate for ProcessorBoolean {
 
         for i in index_low..index_high {
             result[i] = sk.xor(&a[i], &b[i]);
-            result[i] = pitch_trim_module::pitch_trim_bit(sk, &mut result[i]);
+            result[i] = PitchTrimModule::pitch_trim_bit(sk, &mut result[i]);
         }
 
         // #[cfg(debug_assertions)]
@@ -1102,7 +1105,7 @@ impl ProcessorGate for ProcessorBoolean {
         let size: usize = a.len();
         for i in 0..size {
             result[i] = sk.nand(&a[i], &b[i]);
-            result[i] = pitch_trim_module::pitch_trim_bit(sk, &mut result[i]);
+            result[i] = PitchTrimModule::pitch_trim_bit(sk, &mut result[i]);
         }
 
         // #[cfg(debug_assertions)]
@@ -1113,7 +1116,7 @@ impl ProcessorGate for ProcessorBoolean {
 
     fn e_nand_bit(&self, sk: &ServerKey, a: &Ciphertext, b: &Ciphertext) -> Ciphertext {
         let mut result: Ciphertext = sk.nand(a, b);
-        result = pitch_trim_module::pitch_trim_bit(sk, &mut result);
+        result = PitchTrimModule::pitch_trim_bit(sk, &mut result);
         // #[cfg(debug_assertions)]
         // {
         //     println!("DEBUG: `e_nand_bit`");
@@ -1139,7 +1142,7 @@ impl ProcessorGate for ProcessorBoolean {
 
         for i in index_low..index_high {
             result[i] = sk.nand(&a[i], &b[i]);
-            result[i] = pitch_trim_module::pitch_trim_bit(sk, &mut result[i]);
+            result[i] = PitchTrimModule::pitch_trim_bit(sk, &mut result[i]);
         }
 
         // #[cfg(debug_assertions)]
@@ -1167,7 +1170,7 @@ impl ProcessorGate for ProcessorBoolean {
         let size: usize = a.len();
         for i in 0..size {
             result[i] = sk.nor(&a[i], &b[i]);
-            result[i] = pitch_trim_module::pitch_trim_bit(sk, &mut result[i]);
+            result[i] = PitchTrimModule::pitch_trim_bit(sk, &mut result[i]);
         }
 
         // #[cfg(debug_assertions)]
@@ -1178,7 +1181,7 @@ impl ProcessorGate for ProcessorBoolean {
 
     fn e_nor_bit(&self, sk: &ServerKey, a: &Ciphertext, b: &Ciphertext) -> Ciphertext {
         let mut result: Ciphertext = sk.nor(a, b);
-        result = pitch_trim_module::pitch_trim_bit(sk, &mut result);
+        result = PitchTrimModule::pitch_trim_bit(sk, &mut result);
         // #[cfg(debug_assertions)]
         // {
         //     println!("DEBUG: `e_nor_bit`");
@@ -1204,7 +1207,7 @@ impl ProcessorGate for ProcessorBoolean {
 
         for i in index_low..index_high {
             result[i] = sk.nor(&a[i], &b[i]);
-            result[i] = pitch_trim_module::pitch_trim_bit(sk, &mut result[i]);
+            result[i] = PitchTrimModule::pitch_trim_bit(sk, &mut result[i]);
         }
 
         // #[cfg(debug_assertions)]
@@ -1238,7 +1241,7 @@ impl ProcessorGate for ProcessorBoolean {
         let size: usize = a.len();
         for i in 0..size {
             result[i] = sk.xnor(&a[i], &b[i]);
-            result[i] = pitch_trim_module::pitch_trim_bit(sk, &mut result[i]);
+            result[i] = PitchTrimModule::pitch_trim_bit(sk, &mut result[i]);
         }
 
         // #[cfg(debug_assertions)]
@@ -1249,7 +1252,7 @@ impl ProcessorGate for ProcessorBoolean {
 
     fn e_xnor_bit(&self, sk: &ServerKey, a: &Ciphertext, b: &Ciphertext) -> Ciphertext {
         let mut result: Ciphertext = sk.xnor(a, b);
-        result = pitch_trim_module::pitch_trim_bit(sk, &mut result);
+        result = PitchTrimModule::pitch_trim_bit(sk, &mut result);
 
         // #[cfg(debug_assertions)]
         // {
@@ -1276,7 +1279,7 @@ impl ProcessorGate for ProcessorBoolean {
 
         for i in index_low..index_high {
             result[i] = sk.xnor(&a[i], &b[i]);
-            result[i] = pitch_trim_module::pitch_trim_bit(sk, &mut result[i]);
+            result[i] = PitchTrimModule::pitch_trim_bit(sk, &mut result[i]);
         }
 
         // #[cfg(debug_assertions)]
@@ -1566,6 +1569,7 @@ impl ProcessorCircuits for ProcessorBoolean {
             }
         }
     }
+
     fn sign_adder(
         &self,
         sk: &ServerKey,
